@@ -1,0 +1,55 @@
+
+1D oshkor (tau ~ h^2), III/II
+  N= 10 K=  100  xato=1.496e-2  tartib=  - 
+  N= 20 K=  400  xato=3.733e-3  tartib=2.00
+  N= 40 K= 1600  xato=9.327e-4  tartib=2.00
+  N= 80 K= 6400  xato=2.331e-4  tartib=2.00
+
+1D oshkor, tau ~ h (turg'unlik buziladi)
+  N= 10 K=   10  xato=1.848e+7  tartib=  - 
+  N= 20 K=   20  xato=BUZILDI  tartib=  - 
+  N= 40 K=   40  xato=BUZILDI  tartib=  - 
+  N= 80 K=   80  xato=BUZILDI  tartib=  - 
+
+1D oshkormas (theta=1), III/II
+  N= 10 K=   10  xato=1.438e-2  tartib=  - 
+  N= 20 K=   20  xato=7.868e-3  tartib=0.87
+  N= 40 K=   40  xato=4.215e-3  tartib=0.90
+  N= 80 K=   80  xato=2.213e-3  tartib=0.93
+
+1D Krank-Nikolson, III/II
+  N= 10 K=   10  xato=1.319e-2  tartib=  - 
+  N= 20 K=   20  xato=3.295e-3  tartib=2.00
+  N= 40 K=   40  xato=8.236e-4  tartib=2.00
+  N= 80 K=   80  xato=2.059e-4  tartib=2.00
+
+1D Krank-Nikolson, I/III
+  N= 10 K=   10  xato=3.937e-3  tartib=  - 
+  N= 20 K=   20  xato=9.917e-4  tartib=1.99
+  N= 40 K=   40  xato=2.476e-4  tartib=2.00
+  N= 80 K=   80  xato=6.189e-5  tartib=2.00
+
+2D ADI, I/III/II/III
+  N=  8 K=    8  xato=5.952e-3  tartib=  - 
+  N= 16 K=   16  xato=1.495e-3  tartib=1.99
+  N= 32 K=   32  xato=3.736e-4  tartib=2.00
+  N= 64 K=   64  xato=9.347e-5  tartib=2.00
+
+2D ADI, hamma tomon I
+  N=  8 K=    8  xato=3.947e-3  tartib=  - 
+  N= 16 K=   16  xato=9.866e-4  tartib=2.00
+  N= 32 K=   32  xato=2.475e-4  tartib=2.00
+  N= 64 K=   64  xato=6.187e-5  tartib=2.00
+
+2D Krank-Nikolson (SOR), I/III/II/III
+  N=  8 K=    8  xato=5.579e-3  tartib=  - 
+  N= 16 K=   16  xato=1.400e-3  tartib=1.99
+  N= 32 K=   32  xato=3.497e-4  tartib=2.00
+
+2D oshkormas (SOR), I/III/II/III
+  N=  8 K=    8  xato=1.491e-2  tartib=  - 
+  N= 16 K=   16  xato=6.210e-3  tartib=1.26
+  N= 32 K=   32  xato=2.797e-3  tartib=1.15
+
+Kitob 3-masala: u(L/2,T) = 0.7781 (kutilgan 0.7781), Fo = 14.65
+  Zeydel (har qatlamda): u(L/2,T) = 0.7781 , o'rtacha iteratsiya/qatlam = 121.2
