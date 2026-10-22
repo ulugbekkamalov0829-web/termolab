@@ -921,7 +921,7 @@ table.soltab td.l{text-align:left}
  */
 (function (root) {
   'use strict';
-  const VIEWS = { iso: [-0.6, 0.42], front: [0, 0.12], side: [-Math.PI / 2, 0.12], top: [-0.3, 1.38] };
+  const VIEWS = { iso: [-0.6, 0.42], front: [0, 0.12], side: [-Math.PI / 2, 0.12], top: [0, 1.4] };
   function View3D(canvas, tip) {
     this.cv = canvas; this.tip = tip; this.faces = []; this.labels = []; this.opt = {};
     this.yaw = VIEWS.iso[0]; this.pitch = VIEWS.iso[1]; this.zoom = 1; this.spin = false; this.drawn = [];
@@ -1014,8 +1014,12 @@ table.soltab td.l{text-align:left}
     }
     this.drawn = list;
     c.font = '600 13px "IBM Plex Sans", system-ui, sans-serif'; c.textAlign = 'center';
+    const placed = [];
     for (const lb of this.labels) {
-      const s = proj(rot(lb.p)); const w = c.measureText(lb.t).width + 12;
+      const s = proj(rot(lb.p)).slice(); const w = c.measureText(lb.t).width + 12;
+      // yorliqlar bir-birini yopmasin: ustma-ust tushsa pastga suriladi
+      for (let k = 0; k < 6 && placed.some(r => Math.abs(r[0] - s[0]) < (r[2] + w) / 2 + 4 && Math.abs(r[1] - s[1]) < 26); k++) s[1] += 28;
+      placed.push([s[0], s[1], w]);
       c.fillStyle = 'rgba(255,255,255,0.9)'; c.strokeStyle = 'rgba(21,32,44,0.25)';
       c.beginPath(); c.roundRect(s[0] - w / 2, s[1] - 11, w, 22, 6); c.fill(); c.stroke();
       c.fillStyle = '#15202c'; c.fillText(lb.t, s[0], s[1] + 4);
