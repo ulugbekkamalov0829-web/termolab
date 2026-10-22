@@ -30,20 +30,42 @@
         <div class="label">Javob</div>
         <div class="answers" id="am-ans"></div>
         <div class="viz3d">
+          <div class="tools3d" role="toolbar" aria-label="3D boshqaruvi">
+            <button type="button" data-view="iso">Umumiy</button><button type="button" data-view="front">Old</button><button type="button" data-view="side">Yon</button><button type="button" data-view="top">Yuqori</button>
+            <span class="sep"></span>
+            <button type="button" id="am-zin" aria-label="Yaqinlashtirish">＋</button><button type="button" id="am-zout" aria-label="Uzoqlashtirish">－</button>
+            <span class="sep"></span>
+            <button type="button" id="am-spin" aria-pressed="false">Aylantirish</button><button type="button" id="am-bands" aria-pressed="false">Harorat zonalari</button><button type="button" id="am-relief" aria-pressed="false" hidden>Relyef</button><button type="button" id="am-big" aria-pressed="false">Kattalashtirish</button>
+          </div>
           <canvas id="am-3d" aria-label="Jismning 3D ko’rinishi, rang – harorat"></canvas>
           <div class="cb" id="am-cb"></div>
+          <div class="tip" id="am-tip" hidden></div>
         </div>
-        <p class="hint center">3D modelni sichqoncha (yoki barmoq) bilan aylantiring, g’ildirak bilan yaqinlashtiring. Rang – harorat: ko’k – sovuq, qizil – issiq.</p>
+        <p class="hint center">Modelni sichqoncha yoki barmoq bilan aylantiring; kursorni istalgan joyga olib boring – o’sha joyning harorati chiqadi. Rang: ko’k – sovuq, qizil – issiq.</p>
         <div class="timebar">
           <button class="btn" id="am-play" type="button">▶ Boshlash</button>
           <input type="range" id="am-time" min="0" value="0" aria-label="Vaqt">
           <span class="tval" id="am-tval"></span>
         </div>
         <p class="explain" id="am-explain"></p>
+        <div class="solbox">
+          <div class="label">Yechim va tavsiya</div>
+          <div id="am-sol"></div>
+        </div>
         <div class="two">
           <div class="f"><h3 id="am-profT"></h3><canvas id="am-prof" style="height:230px"></canvas>
             <div class="legend"><span><i style="background:#c4401f"></i>hozirgi payt</span><span><i style="background:#9aa7b5"></i>boshlanishi</span></div></div>
           <div class="f"><h3 id="am-probeT"></h3><canvas id="am-probe" style="height:230px"></canvas></div>
+        </div>
+        <div class="two">
+          <div class="f">
+            <div class="rowhead"><div class="label">Variantlarni taqqoslash</div><span><button class="btn ghost sm" id="am-save" type="button">Variantni saqlash</button> <button class="btn ghost sm" id="am-clear" type="button">Tozalash</button></span></div>
+            <div id="am-cmp"></div>
+          </div>
+          <div class="f">
+            <div class="rowhead"><div class="label">Hisobot (matn)</div><span><button class="btn ghost sm" id="am-copy" type="button">Nusxalash</button> <button class="btn ghost sm" id="am-dl" type="button">Yuklab olish</button></span></div>
+            <pre class="report" id="am-report"></pre>
+          </div>
         </div>
       </section>
     </div>

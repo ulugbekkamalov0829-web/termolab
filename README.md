@@ -17,6 +17,15 @@ Real hayotdagi savolga javob beradigan beshta virtual laboratoriya ishi — kiri
 | Elektronika | Radiator protsessorni qizib ketishdan saqlaydimi? | plastinka + manba, 2D |
 | Metallurgiya | Payvand choki qanday soviydi (t₈/₅), qachon ushlash mumkin? | plastinka, 2D |
 
+Har bir masalada:
+- **Javob** — rangli kartochkalar (me’yorda / xavfli / ma’lumot);
+- **Yechim va tavsiya** — teskari masala: kerakli izolyatsiya qalinligi, radiator chidaydigan quvvat, pishirish vaqtlari jadvali, oldindan qizdirish ta’siri;
+- **Matnli hisobot** — berilganlar, natijalar, tavsiya va xulosa; nusxalash yoki .txt yuklab olish;
+- **Variantlarni taqqoslash** — 4 tagacha variant yonma-yon;
+- **3D boshqaruv** — burchaklar (umumiy/old/yon/yuqori), yaqinlashtirish, avtomatik aylanish, harorat zonalari, relyef, kursor ostidagi aniq harorat, vaqt bo’yicha animatsiya.
+
+Foydalanish bo’yicha batafsil: [QOLLANMA.md](QOLLANMA.md).
+
 Ko’p qatlamli va silindr/shar geometriyali masalalar `src/layers.js` dagi chekli hajmlar usuli bilan yechiladi
 (barqaror holatda qatlamli devor va quvur uchun aniq; tekshiruv: `tests/layers.test.js`). 3D ko’rinish `src/view3d.js` — tashqi kutubxonasiz, internetsiz ishlaydi.
 

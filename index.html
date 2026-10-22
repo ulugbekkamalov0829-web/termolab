@@ -155,6 +155,23 @@ details.more fieldset{margin-bottom:10px;background:#fff}
 .dimgrid>div{border-top:3px solid var(--accent);padding-top:8px}
 .dimgrid p{margin:4px 0 0;font-size:14px;color:#334155;line-height:1.5}
 
+.tools3d{position:absolute;left:10px;top:10px;right:220px;display:flex;flex-wrap:wrap;gap:4px;z-index:2}
+.tools3d button{font:inherit;font-size:12.5px;padding:4px 9px;border:1px solid var(--line);background:rgba(255,255,255,.92);border-radius:7px;cursor:pointer;color:var(--ink)}
+.tools3d button:hover{border-color:var(--accent)}
+.tools3d button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tools3d .sep{width:6px}
+@media (max-width:700px){.tools3d{right:10px}.cb{top:auto;bottom:10px}}
+.viz3d.big #am-3d{height:min(80vh,720px)}
+.viz3d .tip{position:absolute}
+.solbox{border:1px solid #bfe0cd;background:#f1faf5;border-radius:12px;padding:12px 16px}
+.solbox ul{margin:6px 0 10px;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.5}
+table.soltab{font-family:var(--body);font-size:13.5px;background:#fff}
+table.soltab caption{text-align:left;font-weight:600;font-size:13px;color:var(--muted);padding:4px 0}
+table.soltab td.l{text-align:left}
+.rowhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.btn.sm{padding:5px 10px;font-size:13px}
+.report{margin:0;white-space:pre-wrap;font-family:var(--mono);font-size:12.5px;line-height:1.5;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-height:340px;overflow:auto}
+
 </style>
 </head>
 <body>
@@ -190,20 +207,42 @@ details.more fieldset{margin-bottom:10px;background:#fff}
         <div class="label">Javob</div>
         <div class="answers" id="am-ans"></div>
         <div class="viz3d">
+          <div class="tools3d" role="toolbar" aria-label="3D boshqaruvi">
+            <button type="button" data-view="iso">Umumiy</button><button type="button" data-view="front">Old</button><button type="button" data-view="side">Yon</button><button type="button" data-view="top">Yuqori</button>
+            <span class="sep"></span>
+            <button type="button" id="am-zin" aria-label="Yaqinlashtirish">＋</button><button type="button" id="am-zout" aria-label="Uzoqlashtirish">－</button>
+            <span class="sep"></span>
+            <button type="button" id="am-spin" aria-pressed="false">Aylantirish</button><button type="button" id="am-bands" aria-pressed="false">Harorat zonalari</button><button type="button" id="am-relief" aria-pressed="false" hidden>Relyef</button><button type="button" id="am-big" aria-pressed="false">Kattalashtirish</button>
+          </div>
           <canvas id="am-3d" aria-label="Jismning 3D ko’rinishi, rang – harorat"></canvas>
           <div class="cb" id="am-cb"></div>
+          <div class="tip" id="am-tip" hidden></div>
         </div>
-        <p class="hint center">3D modelni sichqoncha (yoki barmoq) bilan aylantiring, g’ildirak bilan yaqinlashtiring. Rang – harorat: ko’k – sovuq, qizil – issiq.</p>
+        <p class="hint center">Modelni sichqoncha yoki barmoq bilan aylantiring; kursorni istalgan joyga olib boring – o’sha joyning harorati chiqadi. Rang: ko’k – sovuq, qizil – issiq.</p>
         <div class="timebar">
           <button class="btn" id="am-play" type="button">▶ Boshlash</button>
           <input type="range" id="am-time" min="0" value="0" aria-label="Vaqt">
           <span class="tval" id="am-tval"></span>
         </div>
         <p class="explain" id="am-explain"></p>
+        <div class="solbox">
+          <div class="label">Yechim va tavsiya</div>
+          <div id="am-sol"></div>
+        </div>
         <div class="two">
           <div class="f"><h3 id="am-profT"></h3><canvas id="am-prof" style="height:230px"></canvas>
             <div class="legend"><span><i style="background:#c4401f"></i>hozirgi payt</span><span><i style="background:#9aa7b5"></i>boshlanishi</span></div></div>
           <div class="f"><h3 id="am-probeT"></h3><canvas id="am-probe" style="height:230px"></canvas></div>
+        </div>
+        <div class="two">
+          <div class="f">
+            <div class="rowhead"><div class="label">Variantlarni taqqoslash</div><span><button class="btn ghost sm" id="am-save" type="button">Variantni saqlash</button> <button class="btn ghost sm" id="am-clear" type="button">Tozalash</button></span></div>
+            <div id="am-cmp"></div>
+          </div>
+          <div class="f">
+            <div class="rowhead"><div class="label">Hisobot (matn)</div><span><button class="btn ghost sm" id="am-copy" type="button">Nusxalash</button> <button class="btn ghost sm" id="am-dl" type="button">Yuklab olish</button></span></div>
+            <pre class="report" id="am-report"></pre>
+          </div>
         </div>
       </section>
     </div>
@@ -882,23 +921,59 @@ details.more fieldset{margin-bottom:10px;background:#fff}
  */
 (function (root) {
   'use strict';
-  function View3D(canvas) {
-    this.cv = canvas; this.faces = []; this.labels = []; this.yaw = -0.6; this.pitch = 0.42; this.zoom = 1;
-    this.onchange = null;
+  const VIEWS = { iso: [-0.6, 0.42], front: [0, 0.12], side: [-Math.PI / 2, 0.12], top: [-0.3, 1.38] };
+  function View3D(canvas, tip) {
+    this.cv = canvas; this.tip = tip; this.faces = []; this.labels = []; this.opt = {};
+    this.yaw = VIEWS.iso[0]; this.pitch = VIEWS.iso[1]; this.zoom = 1; this.spin = false; this.drawn = [];
     let drag = null;
     canvas.style.touchAction = 'none'; canvas.style.cursor = 'grab';
-    canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: this.yaw, pitch: this.pitch }; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+    canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: this.yaw, pitch: this.pitch }; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; if (this.tip) this.tip.hidden = true; });
     canvas.addEventListener('pointermove', e => {
-      if (!drag) return;
-      this.yaw = drag.yaw + (e.clientX - drag.x) * 0.01;
-      this.pitch = Math.max(-1.4, Math.min(1.4, drag.pitch + (e.clientY - drag.y) * 0.01));
-      this.draw();
+      if (drag) {
+        this.yaw = drag.yaw + (e.clientX - drag.x) * 0.01;
+        this.pitch = Math.max(-1.45, Math.min(1.45, drag.pitch + (e.clientY - drag.y) * 0.01));
+        this.draw(); return;
+      }
+      this.hover(e);
     });
+    canvas.addEventListener('pointerleave', () => { if (this.tip) this.tip.hidden = true; });
     const end = () => { drag = null; canvas.style.cursor = 'grab'; };
     canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
-    canvas.addEventListener('wheel', e => { e.preventDefault(); this.zoom = Math.max(0.5, Math.min(2.5, this.zoom * (e.deltaY > 0 ? 0.92 : 1.08))); this.draw(); }, { passive: false });
+    canvas.addEventListener('wheel', e => { e.preventDefault(); this.zoomBy(e.deltaY > 0 ? 0.92 : 1.08); }, { passive: false });
   }
-  View3D.prototype.set = function (faces, labels) { this.faces = faces; this.labels = labels || []; this.draw(); };
+  View3D.prototype.set = function (faces, labels, opt) { this.faces = faces; this.labels = labels || []; this.opt = opt || this.opt; this.draw(); };
+  View3D.prototype.zoomBy = function (k) { this.zoom = Math.max(0.5, Math.min(3, this.zoom * k)); this.draw(); };
+  View3D.prototype.view = function (name) {  // ko'rinishga silliq o'tish
+    const [ty, tp] = VIEWS[name] || VIEWS.iso, y0 = this.yaw, p0 = this.pitch, t0 = performance.now();
+    let dy = ty - y0; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+    const step = now => { const k = Math.min(1, (now - t0) / 450), e = k * k * (3 - 2 * k);
+      this.yaw = y0 + dy * e; this.pitch = p0 + (tp - p0) * e; this.draw(); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+  View3D.prototype.setSpin = function (on) {
+    this.spin = on; let last = performance.now();
+    const loop = now => { if (!this.spin) return; this.yaw += (now - last) * 0.0006; last = now; this.draw(); requestAnimationFrame(loop); };
+    if (on) requestAnimationFrame(loop);
+  };
+  // Kursor ostidagi yuza haroratini ko'rsatish
+  View3D.prototype.hover = function (e) {
+    if (!this.tip) return;
+    const r = this.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    for (let k = this.drawn.length - 1; k >= 0; k--) {
+      const it = this.drawn[k]; if (it.v == null) continue;
+      let inside = false; const P = it.s;
+      for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+        if ((P[i][1] > y) !== (P[j][1] > y) && x < (P[j][0] - P[i][0]) * (y - P[i][1]) / (P[j][1] - P[i][1]) + P[i][0]) inside = !inside;
+      }
+      if (inside) {
+        this.tip.hidden = false; this.tip.style.left = x + 'px'; this.tip.style.top = y + 'px';
+        this.tip.textContent = (this.opt.fmt ? this.opt.fmt(it.v) : it.v.toFixed(1)) + (it.tag ? ' · ' + it.tag : '');
+        return;
+      }
+      if (it.opaque) break;
+    }
+    this.tip.hidden = true;
+  };
   View3D.prototype.draw = function () {
     const cv = this.cv, r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
     if (!r.width) return;
@@ -908,6 +983,15 @@ details.more fieldset{margin-bottom:10px;background:#fff}
     const rot = p => { const x = p[0] * cy - p[2] * sy, z0 = p[0] * sy + p[2] * cy; return [x, p[1] * cp - z0 * sp, p[1] * sp + z0 * cp]; };
     const f = Math.min(r.width, r.height) * 1.35 * this.zoom, D = 4.6;
     const proj = q => { const s = f / (D - q[2]); return [r.width / 2 + q[0] * s, r.height / 2 - q[1] * s, q[2]]; };
+    // pol va soya
+    const fy = this.opt.floor ?? -0.75;
+    if (this.opt.floor !== false) {
+      const ring = (rad) => { const pts = []; for (let k = 0; k < 48; k++) { const a = 2 * Math.PI * k / 48; pts.push(proj(rot([rad * Math.cos(a), fy, rad * Math.sin(a)]))); } return pts; };
+      for (const [rad, al] of [[1.25, 0.05], [0.95, 0.06], [0.65, 0.07]]) {
+        const pts = ring(rad); c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath();
+        c.fillStyle = `rgba(21,32,44,${al})`; c.fill();
+      }
+    }
     const L = [0.35, 0.75, 0.55], ln = Math.hypot(...L); L[0] /= ln; L[1] /= ln; L[2] /= ln;
     const list = [];
     for (const fc of this.faces) {
@@ -917,7 +1001,7 @@ details.more fieldset{margin-bottom:10px;background:#fff}
       if (n[2] < 0) n = n.map(v => -v); // kameraga qaragan tomon
       const lit = 0.58 + 0.42 * Math.max(0, n[0] * L[0] + n[1] * L[1] + n[2] * L[2]);
       let z = 0; for (const v of q) z += v[2]; z /= q.length;
-      list.push({ s: q.map(proj), z: z - (fc.bias || 0), col: fc.c, lit: fc.flat ? 1 : lit, edge: fc.edge });
+      list.push({ s: q.map(proj), z: z - (fc.bias || 0), col: fc.c, lit: fc.flat ? 1 : lit, edge: fc.edge, v: fc.c && fc.c.v, tag: fc.tag });
     }
     list.sort((A, B) => A.z - B.z); // uzoqdagilar avval
     for (const it of list) {
@@ -928,10 +1012,11 @@ details.more fieldset{margin-bottom:10px;background:#fff}
       c.closePath(); c.fillStyle = fill; c.fill();
       c.strokeStyle = it.edge || fill; c.lineWidth = it.edge ? 1.2 : 0.6; c.stroke();
     }
+    this.drawn = list;
     c.font = '600 13px "IBM Plex Sans", system-ui, sans-serif'; c.textAlign = 'center';
     for (const lb of this.labels) {
       const s = proj(rot(lb.p)); const w = c.measureText(lb.t).width + 12;
-      c.fillStyle = 'rgba(255,255,255,0.88)'; c.strokeStyle = 'rgba(21,32,44,0.25)';
+      c.fillStyle = 'rgba(255,255,255,0.9)'; c.strokeStyle = 'rgba(21,32,44,0.25)';
       c.beginPath(); c.roundRect(s[0] - w / 2, s[1] - 11, w, 22, 6); c.fill(); c.stroke();
       c.fillStyle = '#15202c'; c.fillText(lb.t, s[0], s[1] + 4);
     }
@@ -1014,10 +1099,12 @@ details.more fieldset{margin-bottom:10px;background:#fff}
     const step = Math.max(1, Math.ceil(Math.max(nx, ny) / 36));
     const at = (i, k) => U[Math.min(ny - 1, k) * nx + Math.min(nx - 1, i)];
     const X = i => -W / 2 + W * i / (nx - 1), Z = k => Dp / 2 - Dp * k / (ny - 1);
+    // relyef rejimi: ustki yuza balandligi = harorat
+    const Hh = opt.relief ? (i, k) => 0.55 * Math.max(0, (at(i, k) - opt.relief[0]) / (opt.relief[1] - opt.relief[0] || 1)) : () => 0;
     for (let k = 0; k < ny - 1; k += step) for (let i = 0; i < nx - 1; i += step) {
       const i1 = Math.min(nx - 1, i + step), k1 = Math.min(ny - 1, k + step);
       const col = colorOf((at(i, k) + at(i1, k) + at(i1, k1) + at(i, k1)) / 4);
-      faces.push(Q([X(i), 0, Z(k)], [X(i1), 0, Z(k)], [X(i1), 0, Z(k1)], [X(i), 0, Z(k1)], col));
+      faces.push(Q([X(i), Hh(i, k), Z(k)], [X(i1), Hh(i1, k), Z(k)], [X(i1), Hh(i1, k1), Z(k1)], [X(i), Hh(i, k1), Z(k1)], col));
     }
     for (let i = 0; i < nx - 1; i += step) { // old va orqa qirralar
       const i1 = Math.min(nx - 1, i + step);
@@ -1743,7 +1830,7 @@ function rgb(t) {
 }
 const n1 = v => (Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2));
 const C = v => n1(v) + ' °C';
-const fmtNum = v => v.toLocaleString('uz-UZ', { maximumFractionDigits: v < 10 ? 2 : v < 100 ? 1 : 0 }).replace(/ /g, ' ');
+function fmtNum(v) { const d = Math.abs(v) < 10 ? 2 : Math.abs(v) < 100 ? 1 : 0; const [a, b] = v.toFixed(d).split('.'); return a.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (b ? '.' + b : ''); }
 function fmtTime(s) {
   if (s < 90) return Math.round(s) + ' soniya';
   if (s < 5400) return (s / 60).toFixed(s < 600 ? 1 : 0) + ' daqiqa';
@@ -1818,7 +1905,7 @@ const SCEN = [
       model: (u, col) => Models3D.wall(sim.x, u, col, edges, [
         { x: -0.35 * (sim.x[sim.x.length - 1]), y: 0.2, t: `Xona ${v.Ti} °C` },
         { x: sim.x[sim.x.length - 1] * 1.35, y: 0.2, t: `Ko’cha ${v.To} °C` }].map(l => ({ x: l.x, y: l.y, t: l.t, z: 0.95 }))),
-      probeLabel: 'Devorning ichki yuzasi', probeIdx: 0
+      probeLabel: 'Devorning ichki yuzasi', probeIdx: 0, floor: -0.64
     };
   },
   fixup(r, v) { // "agar penoplast qo'shilsa" hisobini aniq qilish
@@ -1867,7 +1954,7 @@ const SCEN = [
       explain: `Issiq suv quvur devori va izolyatsiya orqali tashqi havoga issiqlik beradi, shamol bu jarayonni tezlashtiradi. Quvurda suv oqib turgani uchun yo’qotilgan issiqlik suvning sovishiga aylanadi: quvur qanchalik uzun va suv sarfi qanchalik kam bo’lsa, suv shuncha ko’p soviydi.`,
       model: (u, col) => Models3D.pipe(sim.x, u, col, rgb((v.Tw - Math.min(v.To, 0)) / (v.Tw - Math.min(v.To, 0))), [
         { p: [0, 0.0, 0.95], t: `Suv ${v.Tw} °C` }, { p: [0.75, 0.55, 0.3], t: `Havo ${v.To} °C` }]),
-      probeLabel: 'Quvur tashqi sirti', probeIdx: -1
+      probeLabel: 'Quvur tashqi sirti', probeIdx: -1, floor: -0.7
     };
   }
 },
@@ -1897,7 +1984,7 @@ const SCEN = [
         { label: 'Oqi pishishi (qobiq ostida 80 °C)', value: tWhite ? `${(tWhite / 60).toFixed(1)} daqiqa` : '—', note: 'oq qismi sarig’idan ancha oldin pishadi' }
       ],
       explain: `Issiqlik qobiqdan markazga qarab sekin kiradi. Shuning uchun avval oqi, keyin sarig’i pishadi. Kattaroq tuxumga vaqt radius kvadratiga proporsional ko’payadi: 10 % katta tuxumga ≈ 20 % ko’proq vaqt kerak. Tog’da suv pastroq haroratda qaynagani uchun tuxum sekinroq pishadi. (Tuxum xossalari o’rtacha olingan, natija taxminiy.)`,
-      model: (u, col) => Models3D.egg(sim.x, u, col, [{ p: [0, 1.05, 0], t: `Suv ${Tw} °C` }, { p: [0.0, 0.0, 0.25], t: 'sarig’i' }]),
+      model: (u, col) => Models3D.egg(sim.x, u, col, [{ p: [0, 1.25, 0], t: `Suv ${Tw} °C` }, { p: [0.0, 0.0, 0.25], t: 'sarig’i' }]), floor: -1.15,
       probeLabel: 'Tuxum markazi (sarig’i)', probeIdx: 0, timeAxis: 'min'
     };
   }
@@ -1918,7 +2005,7 @@ const SCEN = [
     const M = v.mat === 'cu' ? [401, 8960, 385] : [237, 2700, 900], L = v.L / 100, th = v.th / 1000, chip = 0.03;
     const Qd = v.P / (chip * chip * th), rc = M[1] * M[2], half = chip / 2, n = 40;
     const P2 = { Lx: L, Ly: L, Nx: n, Ny: n, T: 600, K: 300, a2: M[0] / rc, lam: M[0], beta: +v.cool / (rc * th), us: v.Ta,
-      f: (x, y, t) => (Math.abs(x - L / 2) <= half && Math.abs(y - L / 2) <= half ? Qd / rc : 0), init: () => v.Ta,
+      f: chipSource(L, n, chip, v.P, th, rc), init: () => v.Ta,
       bc: { left: { type: 2, q: () => 0 }, right: { type: 2, q: () => 0 }, bottom: { type: 2, q: () => 0 }, top: { type: 2, q: () => 0 } },
       scheme: 'adi', theta: 0.5, frames: 120 };
     const r = TL.solve2D(P2), ci = (n / 2) * (n + 1) + n / 2;
@@ -1929,12 +2016,12 @@ const SCEN = [
     return {
       sim2: r, range: [v.Ta, Math.max(Tmax, v.Ta + 1)], L,
       answers: [
-        { label: 'Protsessor harorati (10 daqiqadan keyin)', value: C(Tmax), verdict: Tmax < 80 ? 'ok' : Tmax < limit ? 'info' : 'bad', vtext: Tmax < 80 ? 'xavfsiz' : Tmax < limit ? `chegaraga yaqin (${limit} °C)` : `qizib ketadi – ${limit} °C dan oshdi, protsessor tezligini pasaytiradi` },
+        { label: 'Protsessor harorati (10 daqiqadan keyin)', value: C(Tmax), num: Tmax, verdict: Tmax < 80 ? 'ok' : Tmax < limit ? 'info' : 'bad', vtext: Tmax < 80 ? 'xavfsiz' : Tmax < limit ? `chegaraga yaqin (${limit} °C)` : `qizib ketadi – ${limit} °C dan oshdi, protsessor tezligini pasaytiradi` },
         { label: 'Radiator chetidagi harorat', value: C(edge), note: 'chet va markaz farqi kichik bo’lsa, radiator yaxshi ishlaydi' },
         { label: 'Qizib bo’lish vaqti', value: t90 ? fmtTime(t90) : '10 daqiqadan ko’p', note: 'oxirgi haroratning 90 % iga yetguncha' }
       ],
       explain: `Protsessor ajratgan issiqlik avval radiator asosi bo’ylab tarqaladi, keyin yuzalar va qovurg’alar orqali havoga chiqadi. Mis alyuminiydan yaxshiroq o’tkazadi, shuning uchun harorat chetlarga tekisroq tarqaladi. Ventilyator havo oqimini kuchaytirib, issiqlik berishni bir necha marta oshiradi.`,
-      model: (u, col) => Models3D.plate(u, r.nx, r.ny, L, L, col, { thick: th, chip, fins: +v.cool > 20, labels: [{ p: [0, 0.32, 0], t: `${v.P} W` }] }),
+      model: (u, col, ext) => Models3D.plate(u, r.nx, r.ny, L, L, col, Object.assign({ thick: th, chip, fins: +v.cool > 20, labels: [{ p: [0, 0.32, 0], t: `${v.P} W` }] }, ext)), floor: +v.cool > 20 ? -0.62 : -0.15, plate: true,
       probeLabel: 'Protsessor markazi', probe2: ci
     };
   }
@@ -1980,11 +2067,111 @@ const SCEN = [
         { label: 'Qo’l bilan ushlash (50 °C)', value: t50 ? fmtTime(t50) : '15 daqiqadan ko’p', verdict: 'info', vtext: 'undan oldin faqat qo’lqop bilan' }
       ],
       explain: `Yoy yonib turganda nuqta qiziydi, o’chgach issiqlik metall ichiga tarqaladi va sirtdan havoga chiqadi. Yupqa plastinka va kuchli sovitish tez soviydi. Po’lat juda tez sovisa toblanib mo’rt bo’ladi – shuning uchun detallar oldindan qizdiriladi: t₈/₅ qanday uzayishini tekshirib ko’ring. Soddalashtirilgan model: erish issiqligi va suyuq vannadagi oqim hisobga olinmagan, natija sifat jihatdan to’g’ri.`,
-      model: (u, col) => Models3D.plate(u, r.nx, r.ny, L, L, col, { thick: th, labels: [{ p: [0, 0.35, 0], t: 'payvand nuqtasi' }] }),
+      model: (u, col, ext) => Models3D.plate(u, r.nx, r.ny, L, L, col, Object.assign({ thick: th, labels: [{ p: [0, 0.35, 0], t: 'payvand nuqtasi' }] }, ext)), floor: -0.15, plate: true,
       probeLabel: 'Payvand nuqtasi markazi', probe2: ci
     };
   }
 }];
+
+// ======================= YECHIM: TESKARI MASALA =======================
+const ceilTo = (x, s) => Math.ceil(x / s - 1e-9) * s;
+// Protsessor manbai: to'rdagi tugunlar soniga qarab normallanadi (umumiy quvvat aniq P ga teng)
+function chipSource(L, n, chip, P, th, rc) {
+  const h = L / n; let cnt = 0;
+  for (let k = 0; k <= n; k++) for (let i = 0; i <= n; i++) if (Math.abs(i * h - L / 2) <= chip / 2 + 1e-12 && Math.abs(k * h - L / 2) <= chip / 2 + 1e-12) cnt++;
+  const q = P / (cnt * h * h * th) / rc;
+  return (x, y) => (Math.abs(x - L / 2) <= chip / 2 + 1e-12 && Math.abs(y - L / 2) <= chip / 2 + 1e-12 ? q : 0);
+}
+const SOLVE = {
+  devor(v) {
+    const m = WALL_MATS[v.mat], ai = 8.7, ao = 23;
+    const Rw = 1 / ai + v.d / 100 / m[1] + 1 / ao;
+    const Rins = v.ins !== 'none' && v.di > 0 ? v.di / 100 / INSUL[v.ins][1] : 0, Rcur = Rw + Rins;
+    const dew = dewPoint(v.Ti, v.RH), Rcond = (v.Ti - v.To) / (ai * Math.max(0.5, v.Ti - dew - 3));
+    const Rt = Math.max(2.5, Rcond);
+    const season = R => (v.Ti - 3) / R * v.A * 150 * 24 / 1000;
+    const items = [];
+    if (Rcur >= Rt) items.push(`Devoringiz talabga javob beradi: issiqlik qarshiligi R = ${Rcur.toFixed(2)} m²·K/W (kerakli ≥ ${Rt.toFixed(2)}). Qo’shimcha izolyatsiya shart emas.`);
+    else {
+      const dp = ceilTo((Rt - Rw) * INSUL.penoplast[1] * 100, 1), dm = ceilTo((Rt - Rw) * INSUL.paxta[1] * 100, 1);
+      const has = v.ins !== 'none' && v.di > 0;
+      items.push(`<b>Tavsiya:</b> ${has ? 'izolyatsiyani jami' : 'devorga tashqi tomondan'} kamida <b>${dp} sm penoplast</b> yoki <b>${dm} sm mineral paxta</b> ${has ? `ga yetkazing (hozir ${v.di} sm ${INSUL[v.ins][0].toLowerCase()})` : 'qo’shing'}; savdodagi qalinlik bo’yicha – ${ceilTo(dp, 5)} sm / ${ceilTo(dm, 5)} sm.`);
+      items.push(`Shunda issiqlik qarshiligi ${Rcur.toFixed(2)} dan ${Rt.toFixed(2)} m²·K/W ga oshadi, eng sovuq kundagi yo’qotish ${fmtNum((v.Ti - v.To) / Rcur * v.A / 1000)} kW dan ${fmtNum((v.Ti - v.To) / Rt * v.A / 1000)} kW ga kamayadi.`);
+      items.push(`Isitish mavsumida ≈ <b>${fmtNum(season(Rcur) - season(Rt))} kWh</b> tejaladi (≈ ${fmtNum((season(Rcur) - season(Rt)) * v.price)} so’m).`);
+    }
+    items.push(`Devor terlamasligi (mog’or bo’lmasligi) uchun kamida R ≥ ${Rcond.toFixed(2)} m²·K/W kerak – ichki yuza shudring nuqtasidan (${C(dew)}) 3 °C yuqori bo’lishi uchun.`);
+    const rows = [0, 5, 10, 15].map(cm => { const R = Rw + cm / 100 / INSUL.penoplast[1], q = (v.Ti - v.To) / R; return [`${cm} sm`, R.toFixed(2), fmtNum(q), C(v.Ti - q / ai), fmtNum(season(R))]; });
+    return { items, table: { cap: 'Variantlar: penoplast qalinligiga qarab', head: ['Penoplast', 'R, m²·K/W', 'q, W/m²', 'Ichki yuza', 'Mavsum, kWh'], rows } };
+  },
+  quvur(v) {
+    const D = +v.D / 1000, wall = D < 0.08 ? 0.0035 : D < 0.17 ? 0.0045 : 0.006, r2 = D / 2, r1 = r2 - wall, alpha = +v.wind, mdot = v.flow / 60;
+    const calc = (key, mm) => {
+      const layers = [{ d: wall, lam: 50, rho: 7850, c: 490, n: 4 }]; if (key !== 'none' && mm > 0) layers.push({ d: mm / 1000, lam: INSUL[key][1], rho: INSUL[key][2], c: INSUL[key][3], n: 16 });
+      const p = { geom: 1, r0: r1, layers, inner: { type: 1, g: v.Tw }, outer: { type: 3, alpha, ue: v.To } };
+      const st = TL.steadyLayered(p), ql = TL.outerFlux(st.mesh, st.u, p.outer);
+      const dT = (v.Tw - v.To) * (1 - Math.exp(-ql / (v.Tw - v.To) * v.Lp / (mdot * 4186)));
+      return { ql, dT, Ts: st.u[st.u.length - 1] };
+    };
+    const find = key => { for (let mm = 0; mm <= 200; mm += 5) { const r = calc(key, mm); if (r.dT <= 2 && r.Ts <= 45) return { mm, ...r }; } return null; };
+    const fp = find('paxta'), fu = find('ppu'), items = [];
+    const cur = calc(v.ins, v.di);
+    if (cur.dT <= 2 && cur.Ts <= 45) items.push(`Hozirgi izolyatsiya yetarli: suv yo’lda ${cur.dT.toFixed(1)} °C soviydi, sirt ${C(cur.Ts)}.`);
+    items.push(fp ? `<b>Tavsiya:</b> suv ${v.Lp} m yo’lda 2 °C dan ko’p sovimasligi va sirt kuydirmasligi uchun kamida <b>${fp.mm} mm mineral paxta</b> yoki <b>${fu ? fu.mm : '—'} mm penopoliuretan</b> kerak.`
+                  : 'Berilgan sharoitda 200 mm izolyatsiya ham suv sovishini 2 °C gacha kamaytira olmaydi – quvur juda uzun yoki suv sarfi juda kam.');
+    if (fp) items.push(`Bunda yo’qotish ${fmtNum(fp.ql)} W/m, sutkasiga ${fmtNum(fp.ql * v.Lp * 24 / 1000)} kWh bo’ladi.`);
+    const key = v.ins === 'none' ? 'paxta' : v.ins;
+    const rows = [0, 25, 50, 75, 100].map(mm => { const r = calc(key, mm); return [`${mm} mm`, fmtNum(r.ql), C(v.Tw - r.dT), C(r.Ts)]; });
+    return { items, table: { cap: `Variantlar: ${INSUL[key][0].toLowerCase()} qalinligiga qarab`, head: ['Izolyatsiya', 'Yo’qotish, W/m', 'Suv oxirida', 'Sirt harorati'], rows } };
+  },
+  tuxum(v) {
+    const R = +v.size / 1000, Tw = +v.Tw;
+    const time = (T0, goal) => { const s = TL.solveLayered({ geom: 2, r0: 0, layers: [{ d: R, lam: 0.54, rho: 1035, c: 3180, n: 40 }], inner: { type: 2, q: 0 }, outer: { type: 3, alpha: 1500, ue: Tw }, T0, T: 1800, K: 900, theta: 0.5, frames: 900 });
+      const t = crossTime(s.times, s.frames.map(f => f[0]), goal, true); return t ? (t / 60).toFixed(1) + ' daq' : '> 30 daq'; };
+    const levels = [['Yumshoq', 55], ['O’rtacha', 65], ['Qattiq', 75]];
+    const rows = levels.map(([n, g]) => [n, time(4, g), time(20, g)]);
+    const g = +v.goal, t = time(+v.T0, g);
+    return { items: [`<b>Tayyorlash:</b> suv ${Tw} °C da qaynagach tuxumni soling, <b>${t}</b>dan keyin oling va darhol sovuq suvga soling – pishish to’xtaydi.`,
+      'Tuxum yorilmasligi uchun muzlatkichdan olingan tuxumni 5–10 daqiqa xona haroratida ushlab turing yoki qaynoq suvga ehtiyotkorlik bilan soling.'],
+      table: { cap: `Pishirish jadvali (${{ '21': 'kichik', '22': 'o’rtacha', '23.5': 'katta' }[v.size]} tuxum, suv ${Tw} °C)`, head: ['Pishish darajasi', 'Muzlatkichdan', 'Xona haroratidan'], rows } };
+  },
+  cpu(v, res) {
+    const Tmax = res.answers[0].num, P = v.P, Ta = v.Ta;
+    const P80 = P * (80 - Ta) / (Tmax - Ta), P95 = P * (95 - Ta) / (Tmax - Ta);
+    const run = (mat, cool) => { // tez baho: kichikroq to'r
+      const M = mat === 'cu' ? [401, 8960, 385] : [237, 2700, 900], L = v.L / 100, th = v.th / 1000, chip = 0.03, rc = M[1] * M[2], n = 24;
+      const r = TL.solve2D({ Lx: L, Ly: L, Nx: n, Ny: n, T: 600, K: 150, a2: M[0] / rc, lam: M[0], beta: cool / (rc * th), us: Ta,
+        f: chipSource(L, n, chip, P, th, rc), init: () => Ta,
+        bc: { left: { type: 2, q: () => 0 }, right: { type: 2, q: () => 0 }, bottom: { type: 2, q: () => 0 }, top: { type: 2, q: () => 0 } }, scheme: 'adi', theta: 0.5, frames: 2 });
+      return r.u[(n / 2) * (n + 1) + n / 2];
+    };
+    const opts = [['10', 'Ventilyatorsiz plastinka'], ['55', 'Qovurg’ali'], ['160', 'Qovurg’ali + ventilyator']];
+    const rows = opts.map(([a, n]) => { const al = run('al', +a), cu = run('cu', +a); return [n, C(al), C(cu)]; });
+    const items = [`Hozirgi radiator bilan protsessor quvvati <b>${fmtNum(P80)} W</b> gacha bo’lsa harorat 80 °C dan oshmaydi (95 °C chegaragacha – ${fmtNum(P95)} W).`];
+    if (Tmax > 80) items.push('<b>Tavsiya:</b> ventilyatorli qovurg’ali radiator tanlang, radiator o’lchamini kattalashtiring yoki misdan yasalganini oling – jadvalda variantlar.');
+    else items.push('Tanlangan radiator yetarli – protsessor xavfsiz haroratda ishlaydi.');
+    return { items, table: { cap: `Variantlar: ${v.P} W protsessor, ${v.L} sm radiator`, head: ['Sovitish', 'Alyuminiy', 'Mis'], rows } };
+  },
+  payvand(v) {
+    const M = { st: [50, 7850, 490], ss: [16, 8000, 500] }[v.mat], L = 0.12, th = v.th / 1000, r0 = 0.006, rc = M[1] * M[2], a = +v.cool, n = 30;
+    const Q0 = v.P * 1000 * 0.75 / (Math.PI * r0 * r0 * th);
+    const t85 = Tp => {
+      const r = TL.solve2D({ Lx: L, Ly: L, Nx: n, Ny: n, T: v.ta + 60, K: Math.round((v.ta + 60) / 0.2), a2: M[0] / rc, lam: M[0], beta: 2 * a / (rc * th), us: 20,
+        f: (x, y, t) => (t <= v.ta ? Q0 / rc * Math.exp(-((x - L / 2) ** 2 + (y - L / 2) ** 2) / (r0 * r0)) : 0), init: () => Tp,
+        bc: { left: { type: 3, alpha: a, ue: 20, q: () => 0 }, right: { type: 3, alpha: a, ue: 20, q: () => 0 }, bottom: { type: 3, alpha: a, ue: 20, q: () => 0 }, top: { type: 3, alpha: a, ue: 20, q: () => 0 } },
+        scheme: 'adi', theta: 0.5, frames: 2, probe: (n / 2) * (n + 1) + n / 2 });
+      const hv = r.probeVals, ht = hv.map((_, j) => j * r.tau), ip = hv.indexOf(Math.max(...hv));
+      const a8 = crossTime(ht.slice(ip), hv.slice(ip), 800, false), a5 = crossTime(ht.slice(ip), hv.slice(ip), 500, false);
+      return a8 != null && a5 != null ? a5 - a8 : null;
+    };
+    const pre = [20, 100, 150, 200, 250], vals = pre.map(t85);
+    const ok = pre.find((p, i) => vals[i] != null && vals[i] >= 5 && vals[i] <= 25);
+    const items = [ok == null ? 'Berilgan quvvat va qalinlikda t₈/₅ me’yorga (5–25 s) yetmadi – yoy quvvatini yoki yonish vaqtini o’zgartiring.'
+      : ok === 20 ? 'Oldindan qizdirish shart emas – t₈/₅ me’yorda.' : `<b>Tavsiya:</b> detalni kamida <b>${ok} °C</b> gacha oldindan qizdiring – shunda t₈/₅ ${vals[pre.indexOf(ok)].toFixed(1)} s bo’ladi va po’lat mo’rt bo’lmaydi.`,
+      'Suv bilan sovitish t₈/₅ ni keskin qisqartiradi – uglerodli po’latda darz ketish xavfi bor.'];
+    const rows = pre.map((p, i) => [`${p} °C`, vals[i] != null ? vals[i].toFixed(1) + ' s' : '—', vals[i] == null ? '—' : vals[i] < 5 ? 'juda tez' : vals[i] <= 25 ? 'me’yorda' : 'sekin']);
+    return { items, table: { cap: 'Oldindan qizdirishning ta’siri', head: ['Qizdirish', 't₈/₅', 'Baho'], rows } };
+  }
+};
 
 // ======================= INTERFEYS =======================
 let cur = null, res = null, view = null, J = 0, playing = false;
@@ -2012,7 +2199,12 @@ function read() {
   }
   return v;
 }
-function colorOf(u) { const [lo, hi] = res.range; return rgb((u - lo) / (hi - lo || 1)); }
+let bands = false, relief = false, saved = {};
+function colorOf(u) {
+  const [lo, hi] = res.range; let t = (u - lo) / (hi - lo || 1);
+  if (bands) t = (Math.floor(Math.max(0, Math.min(0.999, t)) * 10) + 0.5) / 10;  // 10 ta harorat zonasi
+  const c = rgb(t); c.v = u; return c;
+}
 function frames() { return res.sim ? res.sim.frames : res.sim2.frames; }
 function times() { return res.sim ? res.sim.times : res.sim2.times; }
 
@@ -2033,11 +2225,54 @@ function run() {
   $('am-time').value = J;
   $('am-ans').innerHTML = res.answers.map(a => `<div class="ans ${a.verdict || ''}"><span>${a.label}</span><b>${a.value}</b>${a.note ? `<small>${a.note}</small>` : ''}${a.vtext ? `<em>${a.verdict === 'ok' ? '✓ ' : a.verdict === 'bad' ? '⚠ ' : ''}${a.vtext}</em>` : ''}</div>`).join('');
   $('am-explain').innerHTML = res.explain;
+  $('am-relief').hidden = !res.plate;
   drawAll();
+  clearTimeout(run.sol); $('am-sol').innerHTML = '<p class="hint">Yechim hisoblanmoqda…</p>';
+  run.sol = setTimeout(() => { res.sol = SOLVE[cur.id](v, res); renderSolution(); renderReport(v); renderCompare(); }, 30);
+}
+function tableHTML(t) {
+  return `<div class="tablewrap"><table class="soltab"><caption>${t.cap}</caption><thead><tr>${t.head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${t.rows.map(r => `<tr>${r.map((c, i) => `<td${i ? '' : ' class="l"'}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function renderSolution() {
+  const s = res.sol; $('am-sol').innerHTML = `<ul>${s.items.map(i => `<li>${i}</li>`).join('')}</ul>${s.table ? tableHTML(s.table) : ''}`;
+}
+const strip = h => h.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ');
+function inputsText(v) {
+  return cur.fields.filter(f => f.type !== 'number' || f.id !== 'price' || cur.id === 'devor').map(f => {
+    const val = f.type === 'select' ? f.opts.find(o => o[0] === v[f.id])[1] : f.type === 'check' ? (v[f.id] ? 'ha' : 'yo’q') : `${v[f.id]} ${f.unit || ''}`.trim();
+    return [f.label, val];
+  });
+}
+function renderReport(v) {
+  const d = new Date(), pad = n => String(n).padStart(2, '0');
+  const lines = [
+    `TERMOLAB HISOBOTI – ${cur.title.toUpperCase()}`,
+    `Sana: ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}   Soha: ${cur.cat}   Model: ${cur.dim}`,
+    '', `Savol: ${cur.q}`, '', 'BERILGANLAR',
+    ...inputsText(v).map(([a, b]) => `  • ${a}: ${b}`), '', 'NATIJALAR',
+    ...res.answers.map(a => `  • ${a.label}: ${strip(a.value)}${a.note ? ' (' + strip(a.note) + ')' : ''}${a.vtext ? ' – ' + strip(a.vtext) : ''}`), '',
+    'XULOSA VA TAVSIYA', ...res.sol.items.map(i => '  • ' + strip(i)), ''];
+  if (res.sol.table) { const t = res.sol.table; lines.push(t.cap.toUpperCase(), '  ' + t.head.join(' | '), ...t.rows.map(r => '  ' + r.map(strip).join(' | ')), ''); }
+  lines.push('Hisob: TermoLab (chekli ayirmalar / chekli hajmlar usuli). Material xossalari o’rtacha qiymatlar; natija ±10–20 % farq qilishi mumkin.');
+  $('am-report').textContent = lines.join('\n');
+}
+function renderCompare() {
+  const list = saved[cur.id] || [];
+  if (!list.length) { $('am-cmp').innerHTML = '<p class="hint">Hali saqlangan variant yo’q. Shartlarni o’zgartirib, har bir variantni “Variantni saqlash” tugmasi bilan saqlang – natijalar shu yerda yonma-yon chiqadi.</p>'; return; }
+  const labels = list[0].answers.map(a => a.label);
+  $('am-cmp').innerHTML = `<div class="tablewrap"><table class="soltab"><thead><tr><th>Ko’rsatkich</th>${list.map((s, i) => `<th>Variant ${i + 1}<br><span class="hint">${s.name}</span></th>`).join('')}</tr></thead><tbody>${labels.map((l, k) => `<tr><td class="l">${l}</td>${list.map(s => `<td>${s.answers[k] ? strip(s.answers[k].value) : '—'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function saveVariant() {
+  const v = read(), list = saved[cur.id] = saved[cur.id] || [];
+  const changed = cur.fields.filter(f => f.type !== 'number' && f.type !== 'check').slice(0, 4).map(f => f.type === 'select' ? f.opts.find(o => o[0] === v[f.id])[1] : `${v[f.id]} ${f.unit}`).join(', ');
+  list.push({ name: changed, answers: res.answers.map(a => ({ label: a.label, value: a.value })) });
+  if (list.length > 4) list.shift();
+  renderCompare();
 }
 function drawAll() {
   const fr = frames(), ts = times(), u = fr[J];
-  view.set(...Object.values(res.model(u, colorOf)));
+  const mdl = res.model(u, colorOf, relief && res.plate ? { relief: res.range } : {});
+  view.set(mdl.faces, mdl.labels, { floor: res.floor ?? -0.7, fmt: C });
   const T = ts[ts.length - 1];
   $('am-tval').textContent = 't = ' + fmtTime(ts[J]);
   // rang shkalasi
@@ -2081,7 +2316,26 @@ function plot(cv, xs, series, range, xfmt, xtitle, vlines, marker) {
 function init() {
   $('am-cats').innerHTML = SCEN.map(s => `<button class="scen" type="button" data-id="${s.id}" aria-pressed="false"><span class="ico">${icon(s.icon)}</span><span><small>${s.cat}</small><b>${s.title}</b></span></button>`).join('');
   document.querySelectorAll('.scen').forEach(b => b.addEventListener('click', () => select(b.dataset.id)));
-  view = new View3D($('am-3d'));
+  view = new View3D($('am-3d'), $('am-tip'));
+  document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => view.view(b.dataset.view)));
+  $('am-zin').addEventListener('click', () => view.zoomBy(1.15)); $('am-zout').addEventListener('click', () => view.zoomBy(1 / 1.15));
+  const tog = (id, fn) => $(id).addEventListener('click', () => { const on = $(id).getAttribute('aria-pressed') !== 'true'; $(id).setAttribute('aria-pressed', on); fn(on); });
+  tog('am-spin', on => view.setSpin(on));
+  tog('am-bands', on => { bands = on; drawAll(); });
+  tog('am-relief', on => { relief = on; drawAll(); });
+  tog('am-big', on => { document.querySelector('.viz3d').classList.toggle('big', on); setTimeout(drawAll, 30); });
+  $('am-save').addEventListener('click', saveVariant);
+  $('am-clear').addEventListener('click', () => { saved[cur.id] = []; renderCompare(); });
+  $('am-copy').addEventListener('click', () => {
+    const txt = $('am-report').textContent, done = () => { $('am-copy').textContent = 'Nusxalandi ✓'; setTimeout(() => $('am-copy').textContent = 'Nusxalash', 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, () => { selectReport(); });
+    else selectReport();
+  });
+  function selectReport() { const r = document.createRange(); r.selectNodeContents($('am-report')); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); $('am-copy').textContent = 'Ctrl+C bosing'; }
+  $('am-dl').addEventListener('click', () => {
+    const blob = new Blob(['\ufeff' + $('am-report').textContent], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `TermoLab-${cur.id}-hisobot.txt`; document.body.appendChild(a); a.click(); a.remove();
+  });
   $('am-time').addEventListener('input', e => { J = +e.target.value; drawAll(); });
   let last = 0;
   const tick = ts => {

@@ -11,16 +11,18 @@
 | 6–7. Diskretlash va θ-sxema | Toʻr, soxta tugun, uch sxema, Rannacher | 1:00 |
 | 8. Turgʻunlik | Fon Neyman, G(ξ), Fo ≤ ½ | 0:40 |
 | 9–10. ADI va sistemalar | Pisman–Rekford; tadqiqot natijasi; haydash, Zeydel, SOR | 0:50 |
-| 11. Ilova (jonli namoyish) | Beton devor → plastinka → radiator → turgʻunlik grafigi | 1:00 |
-| 12–14. Tekshiruv | Yaqinlashish tartibi, analitik yechimlar, darslik (992) | 1:00 |
-| 15. Xulosa | Natijalar va keyingi bosqich | 0:30 |
+| 11. Ilova | Tuzilma: amaliy masalalar + ilmiy laboratoriya | 0:30 |
+| 12. Amaliy masalalar (jonli namoyish) | Javob → tavsiya → 3D → taqqoslash → hisobot | 1:30 |
+| 13–15. Tekshiruv | Yaqinlashish tartibi, analitik yechimlar, darslik (992) | 1:00 |
+| 16. Xulosa | Natijalar va keyingi bosqich | 0:30 |
 
-**Jonli namoyish (asosiy, 2 daqiqa) – “Amaliy masalalar” bo’limi:**
-1. *Uy devori qishda*: 38 sm g’isht → 42.8 W/m², mog’or xavfi yo’q. Izolyatsiyani “Penoplast, 5 sm” qiling → yo’qotish 65 % kamayadi. 3D modelni aylantiring.
-2. *Issiq suv quvuri*: izolyatsiyani “Yo’q” qiling → 381 W/m, suv sirti kuydiradi; qaytaring → 27.7 W/m.
-3. *Tuxum qaynatish*: o’rtacha tuxum, muzlatkichdan → 8.7 daqiqa; “Tog’da” → vaqt uzayadi.
-4. *Protsessor radiatori*: ventilyatorni o’chiring → protsessor qizib ketadi.
-5. Pastdagi “1D, 2D va 3D: farqi nimada?” blokini ko’rsating.
+**Jonli namoyish (asosiy, 2–3 daqiqa) – “Amaliy masalalar” bo’limi:**
+1. *Uy devori qishda*: 38 sm g’isht → 42.8 W/m², mavsumda 5 236 kWh. “Yechim va tavsiya” blokini ko’rsating: “kamida 7 sm penoplast” — bu **teskari masala**, dastur o’zi kerakli qalinlikni topadi.
+2. “Variantni saqlash” → izolyatsiyani “Penoplast, 5 sm” qiling → yana saqlang → taqqoslash jadvali: yo’qotish 65 % kam.
+3. 3D: “Yon” burchak, “Harorat zonalari”, kursorni devor ustiga olib boring — aniq harorat chiqadi.
+4. *Issiq suv quvuri*: izolyatsiyani “Yo’q” qiling → 381 W/m; tavsiya — 50 mm mineral paxta.
+5. *Protsessor radiatori*: 65 W → 88 °C; dastur “56 W gacha 80 °C dan oshmaydi” deydi. Ventilyatorni o’chiring → qizib ketadi. “Relyef” tugmasi — issiq nuqta tepalik bo’lib ko’tariladi.
+6. Pastdagi **Hisobot** → “Nusxalash”: natija oddiy matn ko’rinishida, Telegram yoki Word’ga qo’yish mumkin.
 
 **Ilmiy qism namoyishi:** "1D · Beton devor" → issiqlik oqimini koʻrsatish → "2D · Poʻlat plastinka" → Boshlash →
 "2D · Protsessor radiatori" → "Turgʻunlik" boʻlimida Fo slayderini 1 dan oshirish → "Aniqlik" va "Ishonchlilik" boʻlimlari.
@@ -75,3 +77,22 @@ Darslikda bitta masala, faqat I tur shart va bitta sxema. Men umumiy masalani (1
 
 **Kimga foydali?**
 Talabalar va oʻqituvchilar uchun "Matematik modellashtirish", "Sonli usullar", "Issiqlik texnikasi" fanlarida virtual laboratoriya; muhandislar uchun tez taxminiy hisob.
+
+### Yangi imkoniyatlar bo’yicha savollar
+
+**Teskari masala nima va qanday yechiladi?**
+To’g’ri masala: “shu devor qancha yo’qotadi?”. Teskari masala: “yo’qotish me’yordan oshmasligi uchun qanday izolyatsiya kerak?”.
+Dastur kerakli parametrni ikki yo’l bilan topadi:
+- ketma-ket hisoblash (qalinlik bo’yicha qidiruv);
+- chiziqlilikdan foydalanish — masalan, radiatorda harorat ortishi quvvatga proporsional, shuning uchun 80 °C ga mos quvvat bitta hisobdan aniqlanadi.
+
+**Matnli hisobot nima uchun kerak?**
+Foydalanuvchi natijani faqat rasmda emas, hujjat sifatida olishi kerak. Hisobot berilganlar, natijalar, tavsiya va xulosadan iborat. Uni nusxalab yuborish yoki .txt fayl qilib saqlash mumkin.
+
+**3D qanday chiziladi, kutubxona ishlatilganmi?**
+Yo’q, o’zim yozgan Canvas rendereri ishlatilgan:
+- perspektiv proyeksiya;
+- yuzalarni chuqurlik bo’yicha saralash (rassom algoritmi);
+- Lambert yoritilishi.
+
+Kursor ostidagi harorat nuqtaning ko’pburchak ichida yotishini tekshirish orqali aniqlanadi. Tashqi kutubxona yo’qligi uchun sayt internetsiz ham ishlaydi.

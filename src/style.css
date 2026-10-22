@@ -143,3 +143,20 @@ details.more fieldset{margin-bottom:10px;background:#fff}
 @media (max-width:760px){.dimgrid{grid-template-columns:minmax(0,1fr)}}
 .dimgrid>div{border-top:3px solid var(--accent);padding-top:8px}
 .dimgrid p{margin:4px 0 0;font-size:14px;color:#334155;line-height:1.5}
+
+.tools3d{position:absolute;left:10px;top:10px;right:220px;display:flex;flex-wrap:wrap;gap:4px;z-index:2}
+.tools3d button{font:inherit;font-size:12.5px;padding:4px 9px;border:1px solid var(--line);background:rgba(255,255,255,.92);border-radius:7px;cursor:pointer;color:var(--ink)}
+.tools3d button:hover{border-color:var(--accent)}
+.tools3d button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tools3d .sep{width:6px}
+@media (max-width:700px){.tools3d{right:10px}.cb{top:auto;bottom:10px}}
+.viz3d.big #am-3d{height:min(80vh,720px)}
+.viz3d .tip{position:absolute}
+.solbox{border:1px solid #bfe0cd;background:#f1faf5;border-radius:12px;padding:12px 16px}
+.solbox ul{margin:6px 0 10px;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.5}
+table.soltab{font-family:var(--body);font-size:13.5px;background:#fff}
+table.soltab caption{text-align:left;font-weight:600;font-size:13px;color:var(--muted);padding:4px 0}
+table.soltab td.l{text-align:left}
+.rowhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.btn.sm{padding:5px 10px;font-size:13px}
+.report{margin:0;white-space:pre-wrap;font-family:var(--mono);font-size:12.5px;line-height:1.5;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-height:340px;overflow:auto}

@@ -5,23 +5,59 @@
  */
 (function (root) {
   'use strict';
-  function View3D(canvas) {
-    this.cv = canvas; this.faces = []; this.labels = []; this.yaw = -0.6; this.pitch = 0.42; this.zoom = 1;
-    this.onchange = null;
+  const VIEWS = { iso: [-0.6, 0.42], front: [0, 0.12], side: [-Math.PI / 2, 0.12], top: [-0.3, 1.38] };
+  function View3D(canvas, tip) {
+    this.cv = canvas; this.tip = tip; this.faces = []; this.labels = []; this.opt = {};
+    this.yaw = VIEWS.iso[0]; this.pitch = VIEWS.iso[1]; this.zoom = 1; this.spin = false; this.drawn = [];
     let drag = null;
     canvas.style.touchAction = 'none'; canvas.style.cursor = 'grab';
-    canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: this.yaw, pitch: this.pitch }; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+    canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: this.yaw, pitch: this.pitch }; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; if (this.tip) this.tip.hidden = true; });
     canvas.addEventListener('pointermove', e => {
-      if (!drag) return;
-      this.yaw = drag.yaw + (e.clientX - drag.x) * 0.01;
-      this.pitch = Math.max(-1.4, Math.min(1.4, drag.pitch + (e.clientY - drag.y) * 0.01));
-      this.draw();
+      if (drag) {
+        this.yaw = drag.yaw + (e.clientX - drag.x) * 0.01;
+        this.pitch = Math.max(-1.45, Math.min(1.45, drag.pitch + (e.clientY - drag.y) * 0.01));
+        this.draw(); return;
+      }
+      this.hover(e);
     });
+    canvas.addEventListener('pointerleave', () => { if (this.tip) this.tip.hidden = true; });
     const end = () => { drag = null; canvas.style.cursor = 'grab'; };
     canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
-    canvas.addEventListener('wheel', e => { e.preventDefault(); this.zoom = Math.max(0.5, Math.min(2.5, this.zoom * (e.deltaY > 0 ? 0.92 : 1.08))); this.draw(); }, { passive: false });
+    canvas.addEventListener('wheel', e => { e.preventDefault(); this.zoomBy(e.deltaY > 0 ? 0.92 : 1.08); }, { passive: false });
   }
-  View3D.prototype.set = function (faces, labels) { this.faces = faces; this.labels = labels || []; this.draw(); };
+  View3D.prototype.set = function (faces, labels, opt) { this.faces = faces; this.labels = labels || []; this.opt = opt || this.opt; this.draw(); };
+  View3D.prototype.zoomBy = function (k) { this.zoom = Math.max(0.5, Math.min(3, this.zoom * k)); this.draw(); };
+  View3D.prototype.view = function (name) {  // ko'rinishga silliq o'tish
+    const [ty, tp] = VIEWS[name] || VIEWS.iso, y0 = this.yaw, p0 = this.pitch, t0 = performance.now();
+    let dy = ty - y0; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+    const step = now => { const k = Math.min(1, (now - t0) / 450), e = k * k * (3 - 2 * k);
+      this.yaw = y0 + dy * e; this.pitch = p0 + (tp - p0) * e; this.draw(); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+  View3D.prototype.setSpin = function (on) {
+    this.spin = on; let last = performance.now();
+    const loop = now => { if (!this.spin) return; this.yaw += (now - last) * 0.0006; last = now; this.draw(); requestAnimationFrame(loop); };
+    if (on) requestAnimationFrame(loop);
+  };
+  // Kursor ostidagi yuza haroratini ko'rsatish
+  View3D.prototype.hover = function (e) {
+    if (!this.tip) return;
+    const r = this.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    for (let k = this.drawn.length - 1; k >= 0; k--) {
+      const it = this.drawn[k]; if (it.v == null) continue;
+      let inside = false; const P = it.s;
+      for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+        if ((P[i][1] > y) !== (P[j][1] > y) && x < (P[j][0] - P[i][0]) * (y - P[i][1]) / (P[j][1] - P[i][1]) + P[i][0]) inside = !inside;
+      }
+      if (inside) {
+        this.tip.hidden = false; this.tip.style.left = x + 'px'; this.tip.style.top = y + 'px';
+        this.tip.textContent = (this.opt.fmt ? this.opt.fmt(it.v) : it.v.toFixed(1)) + (it.tag ? ' · ' + it.tag : '');
+        return;
+      }
+      if (it.opaque) break;
+    }
+    this.tip.hidden = true;
+  };
   View3D.prototype.draw = function () {
     const cv = this.cv, r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
     if (!r.width) return;
@@ -31,6 +67,15 @@
     const rot = p => { const x = p[0] * cy - p[2] * sy, z0 = p[0] * sy + p[2] * cy; return [x, p[1] * cp - z0 * sp, p[1] * sp + z0 * cp]; };
     const f = Math.min(r.width, r.height) * 1.35 * this.zoom, D = 4.6;
     const proj = q => { const s = f / (D - q[2]); return [r.width / 2 + q[0] * s, r.height / 2 - q[1] * s, q[2]]; };
+    // pol va soya
+    const fy = this.opt.floor ?? -0.75;
+    if (this.opt.floor !== false) {
+      const ring = (rad) => { const pts = []; for (let k = 0; k < 48; k++) { const a = 2 * Math.PI * k / 48; pts.push(proj(rot([rad * Math.cos(a), fy, rad * Math.sin(a)]))); } return pts; };
+      for (const [rad, al] of [[1.25, 0.05], [0.95, 0.06], [0.65, 0.07]]) {
+        const pts = ring(rad); c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath();
+        c.fillStyle = `rgba(21,32,44,${al})`; c.fill();
+      }
+    }
     const L = [0.35, 0.75, 0.55], ln = Math.hypot(...L); L[0] /= ln; L[1] /= ln; L[2] /= ln;
     const list = [];
     for (const fc of this.faces) {
@@ -40,7 +85,7 @@
       if (n[2] < 0) n = n.map(v => -v); // kameraga qaragan tomon
       const lit = 0.58 + 0.42 * Math.max(0, n[0] * L[0] + n[1] * L[1] + n[2] * L[2]);
       let z = 0; for (const v of q) z += v[2]; z /= q.length;
-      list.push({ s: q.map(proj), z: z - (fc.bias || 0), col: fc.c, lit: fc.flat ? 1 : lit, edge: fc.edge });
+      list.push({ s: q.map(proj), z: z - (fc.bias || 0), col: fc.c, lit: fc.flat ? 1 : lit, edge: fc.edge, v: fc.c && fc.c.v, tag: fc.tag });
     }
     list.sort((A, B) => A.z - B.z); // uzoqdagilar avval
     for (const it of list) {
@@ -51,10 +96,11 @@
       c.closePath(); c.fillStyle = fill; c.fill();
       c.strokeStyle = it.edge || fill; c.lineWidth = it.edge ? 1.2 : 0.6; c.stroke();
     }
+    this.drawn = list;
     c.font = '600 13px "IBM Plex Sans", system-ui, sans-serif'; c.textAlign = 'center';
     for (const lb of this.labels) {
       const s = proj(rot(lb.p)); const w = c.measureText(lb.t).width + 12;
-      c.fillStyle = 'rgba(255,255,255,0.88)'; c.strokeStyle = 'rgba(21,32,44,0.25)';
+      c.fillStyle = 'rgba(255,255,255,0.9)'; c.strokeStyle = 'rgba(21,32,44,0.25)';
       c.beginPath(); c.roundRect(s[0] - w / 2, s[1] - 11, w, 22, 6); c.fill(); c.stroke();
       c.fillStyle = '#15202c'; c.fillText(lb.t, s[0], s[1] + 4);
     }
@@ -137,10 +183,12 @@
     const step = Math.max(1, Math.ceil(Math.max(nx, ny) / 36));
     const at = (i, k) => U[Math.min(ny - 1, k) * nx + Math.min(nx - 1, i)];
     const X = i => -W / 2 + W * i / (nx - 1), Z = k => Dp / 2 - Dp * k / (ny - 1);
+    // relyef rejimi: ustki yuza balandligi = harorat
+    const Hh = opt.relief ? (i, k) => 0.55 * Math.max(0, (at(i, k) - opt.relief[0]) / (opt.relief[1] - opt.relief[0] || 1)) : () => 0;
     for (let k = 0; k < ny - 1; k += step) for (let i = 0; i < nx - 1; i += step) {
       const i1 = Math.min(nx - 1, i + step), k1 = Math.min(ny - 1, k + step);
       const col = colorOf((at(i, k) + at(i1, k) + at(i1, k1) + at(i, k1)) / 4);
-      faces.push(Q([X(i), 0, Z(k)], [X(i1), 0, Z(k)], [X(i1), 0, Z(k1)], [X(i), 0, Z(k1)], col));
+      faces.push(Q([X(i), Hh(i, k), Z(k)], [X(i1), Hh(i1, k), Z(k)], [X(i1), Hh(i1, k1), Z(k1)], [X(i), Hh(i, k1), Z(k1)], col));
     }
     for (let i = 0; i < nx - 1; i += step) { // old va orqa qirralar
       const i1 = Math.min(nx - 1, i + step);
