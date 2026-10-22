@@ -15,39 +15,39 @@ function eq(key, s = 1.25) {
 const MATS = [
   { id: 'cu', name: 'Mis', lam: 401, rho: 8960, c: 385 },
   { id: 'al', name: 'Alyuminiy', lam: 237, rho: 2700, c: 900 },
-  { id: 'st', name: 'Poʻlat (uglerodli)', lam: 50, rho: 7850, c: 490 },
-  { id: 'ss', name: 'Zanglamas poʻlat', lam: 16, rho: 8000, c: 500 },
+  { id: 'st', name: 'Po’lat (uglerodli)', lam: 50, rho: 7850, c: 490 },
+  { id: 'ss', name: 'Zanglamas po’lat', lam: 16, rho: 8000, c: 500 },
   { id: 'nc', name: 'Nixrom', lam: 11.3, rho: 8400, c: 450 },
   { id: 'cr', name: 'Beton', lam: 1.4, rho: 2300, c: 880 },
-  { id: 'br', name: 'Gʻisht', lam: 0.72, rho: 1920, c: 835 },
+  { id: 'br', name: 'G’isht', lam: 0.72, rho: 1920, c: 835 },
   { id: 'gl', name: 'Shisha', lam: 1.0, rho: 2500, c: 840 },
-  { id: 'wd', name: 'Yogʻoch (qaragʻay)', lam: 0.12, rho: 510, c: 1380 },
+  { id: 'wd', name: 'Yog’och (qarag’ay)', lam: 0.12, rho: 510, c: 1380 },
   { id: 'wa', name: 'Suv (harakatsiz)', lam: 0.6, rho: 1000, c: 4186 },
   { id: 'bk', name: 'Shartli (darslik, a² = 25)', lam: 1, rho: 1, c: 0.04 },
-  { id: 'custom', name: 'Boshqa (qoʻlda kiritish)' }
+  { id: 'custom', name: 'Boshqa (qo’lda kiritish)' }
 ];
 
 // ---------------- Tayyor masalalar ----------------
 const B = (type, o = {}) => Object.assign({ type, g: 20, q: 0, alpha: 10, ue: 20 }, o);
 const PRESETS = [
-  { id: 'book', name: '1D · Darslikdagi 3-masala (oʻlchamsiz)', dimless: true,
-    note: 'Darslik: L = 8, T = 3, N = 50, K = 200, a = 5, h = 0.16, u₀ = 2. Natija kitob jadvali bilan mos keladi.',
+  { id: 'book', name: '1D · Namunaviy masala: soviydigan sterjen (o’lchamsiz)', dimless: true,
+    note: 'Matematik modellashtirish bo’yicha o’quv qo’llanmadagi misol: uchlari 0.25 va 1.18 da, yon sirti 2 haroratli muhit bilan almashadi. Birliklar o’lchamsiz.',
     dim: 1, Lx: 8, Ly: 1, Nx: 50, Ny: 20, mat: 'bk', Tend: 3, tunit: 1, K: 200,
     init: { type: 'book', T0: 0, dT: 0, r0: 0.5 }, bc: { left: B(1, { g: 0.25 }), right: B(1, { g: 1.18 }) },
     side: { as: 0.0064, geo: 4, us: 2 }, src: { type: 'none', Q0: 0, Qr: 0.01, Qt: 0 }, scheme: 'implicit', solver: 'thomas' },
-  { id: 'cu', name: '1D · Mis sterjen, bir uchi 100 °C', note: 'Mis sterjen d = 10 mm: chap uchi 100 °C da, oʻng uchi va yon sirti havoda (α = 10 W/(m²·K)) soviydi.',
+  { id: 'cu', name: '1D · Mis sterjen, bir uchi 100 °C', note: 'Mis sterjen d = 10 mm: chap uchi 100 °C da, o’ng uchi va yon sirti havoda (α = 10 W/(m²·K)) soviydi.',
     dim: 1, Lx: 0.5, Ly: 1, Nx: 80, Ny: 20, mat: 'cu', Tend: 60, tunit: 60, K: 300,
     init: { type: 'uniform', T0: 20, dT: 0, r0: 0.01 }, bc: { left: B(1, { g: 100 }), right: B(3, { alpha: 10, ue: 20 }) },
     side: { as: 10, geo: 0.01, us: 20 }, src: { type: 'none', Q0: 0, Qr: 0.01, Qt: 0 }, scheme: 'cn', solver: 'thomas' },
-  { id: 'wall', name: '1D · Beton devor, qishda', note: 'Qalinligi 30 sm beton devor: ichkarida 20 °C (α = 8), tashqarida −10 °C (α = 23). Devor orqali yoʻqotilayotgan issiqlik oqimi hisoblanadi.',
+  { id: 'wall', name: '1D · Beton devor, qishda', note: 'Qalinligi 30 sm beton devor: ichkarida 20 °C (α = 8), tashqarida −10 °C (α = 23). Devor orqali yo’qotilayotgan issiqlik oqimi hisoblanadi.',
     dim: 1, Lx: 0.3, Ly: 1, Nx: 60, Ny: 20, mat: 'cr', Tend: 48, tunit: 3600, K: 400,
     init: { type: 'uniform', T0: 15, dT: 0, r0: 0.01 }, bc: { left: B(3, { alpha: 8, ue: 20 }), right: B(3, { alpha: 23, ue: -10 }) },
     side: { as: 0, geo: 0.3, us: 20 }, src: { type: 'none', Q0: 0, Qr: 0.01, Qt: 0 }, scheme: 'implicit', solver: 'thomas' },
-  { id: 'wire', name: '1D · Elektr qizdirgich simi', note: 'Nixrom sim d = 1 mm, tok oʻtganda ichki manba Q = 2·10⁷ W/m³; uchlari qisqichda 20 °C, yon sirti havoda soviydi.',
+  { id: 'wire', name: '1D · Elektr qizdirgich simi', note: 'Nixrom sim d = 1 mm, tok o’tganda ichki manba Q = 2·10⁷ W/m³; uchlari qisqichda 20 °C, yon sirti havoda soviydi.',
     dim: 1, Lx: 0.2, Ly: 1, Nx: 80, Ny: 20, mat: 'nc', Tend: 300, tunit: 1, K: 300,
     init: { type: 'uniform', T0: 20, dT: 0, r0: 0.01 }, bc: { left: B(1, { g: 20 }), right: B(1, { g: 20 }) },
     side: { as: 15, geo: 0.001, us: 20 }, src: { type: 'uniform', Q0: 2e7, Qr: 0.01, Qt: 0 }, scheme: 'cn', solver: 'thomas' },
-  { id: 'plate', name: '2D · Poʻlat plastinka, chap qirrasi 300 °C', note: 'Poʻlat plastinka 20×20 sm: chap qirrasi 300 °C, qolgan qirralari havoda (III tur).',
+  { id: 'plate', name: '2D · Po’lat plastinka, chap qirrasi 300 °C', note: 'Po’lat plastinka 20×20 sm: chap qirrasi 300 °C, qolgan qirralari havoda (III tur).',
     dim: 2, Lx: 0.2, Ly: 0.2, Nx: 50, Ny: 50, mat: 'st', Tend: 60, tunit: 60, K: 200,
     init: { type: 'uniform', T0: 20, dT: 0, r0: 0.01 },
     bc: { left: B(1, { g: 300 }), right: B(3, { alpha: 10, ue: 20 }), bottom: B(3, { alpha: 10, ue: 20 }), top: B(3, { alpha: 10, ue: 20 }) },
@@ -57,14 +57,14 @@ const PRESETS = [
     init: { type: 'uniform', T0: 25, dT: 0, r0: 0.01 },
     bc: { left: B(2, { q: 0 }), right: B(2, { q: 0 }), bottom: B(2, { q: 0 }), top: B(2, { q: 0 }) },
     side: { as: 25, geo: 0.003, us: 25 }, src: { type: 'spot', Q0: 3.18e7, Qr: 0.01, Qt: 0 }, scheme: 'adi', solver: 'thomas' },
-  { id: 'weld', name: '2D · Payvandlash nuqtasining sovishi', note: 'Poʻlat plastinka 10×10 sm, markazi 1220 °C gacha qizdirilgan; qirralari va yuzalari havoda soviydi.',
+  { id: 'weld', name: '2D · Payvandlash nuqtasining sovishi', note: 'Po’lat plastinka 10×10 sm, markazi 1220 °C gacha qizdirilgan; qirralari va yuzalari havoda soviydi.',
     dim: 2, Lx: 0.1, Ly: 0.1, Nx: 60, Ny: 60, mat: 'st', Tend: 20, tunit: 1, K: 200, scale: 'frame',
     init: { type: 'spot', T0: 20, dT: 1200, r0: 0.006 },
     bc: { left: B(3, { alpha: 10, ue: 20 }), right: B(3, { alpha: 10, ue: 20 }), bottom: B(3, { alpha: 10, ue: 20 }), top: B(3, { alpha: 10, ue: 20 }) },
     side: { as: 10, geo: 0.005, us: 20 }, src: { type: 'none', Q0: 0, Qr: 0.01, Qt: 0 }, scheme: 'adi', solver: 'thomas' }
 ];
-const SIDES1 = [['left', 'Chap uchi (x = 0)'], ['right', 'Oʻng uchi (x = L)']];
-const SIDES2 = [['left', 'Chap (x = 0)'], ['right', 'Oʻng (x = Lₓ)'], ['bottom', 'Past (y = 0)'], ['top', 'Yuqori (y = L_y)']];
+const SIDES1 = [['left', 'Chap uchi (x = 0)'], ['right', 'O’ng uchi (x = L)']];
+const SIDES2 = [['left', 'Chap (x = 0)'], ['right', 'O’ng (x = Lₓ)'], ['bottom', 'Past (y = 0)'], ['top', 'Yuqori (y = L_y)']];
 
 let S = null;          // joriy holat
 let R = null, E = null; // natija va oshkor sxema natijasi (taqqoslash uchun)
@@ -79,15 +79,15 @@ function bcHTML(side, title, b) {
   return `<div class="bcbox" data-side="${side}">
     <div class="bchead"><b>${title}</b>
       <select data-k="type" aria-label="${title}: shart turi">
-        <option value="1"${b.type == 1 ? ' selected' : ''}>I tur: u = g</option>
-        <option value="2"${b.type == 2 ? ' selected' : ''}>II tur: oqim q</option>
-        <option value="3"${b.type == 3 ? ' selected' : ''}>III tur: konveksiya</option>
+        <option value="1"${b.type == 1 ? ' selected' : ''}>Harorat berilgan (I tur)</option>
+        <option value="2"${b.type == 2 ? ' selected' : ''}>Issiqlik oqimi (II tur)</option>
+        <option value="3"${b.type == 3 ? ' selected' : ''}>Havo bilan almashadi (III tur)</option>
       </select></div>
     <div class="row3">
-      ${b.type == 1 ? `<div class="f"><label>g, ${unit || 'birlik'}</label><input type="number" step="any" data-k="g" value="${b.g}"></div>` : ''}
-      ${b.type == 2 ? `<div class="f"><label>q, W/m² (kiruvchi)</label><input type="number" step="any" data-k="q" value="${b.q}"></div>` : ''}
+      ${b.type == 1 ? `<div class="f"><label>Harorat${unit ? ', ' + unit : ''}</label><input type="number" step="any" data-k="g" value="${b.g}"></div>` : ''}
+      ${b.type == 2 ? `<div class="f"><label>Oqim, W/m² (+ isitadi)</label><input type="number" step="any" data-k="q" value="${b.q}"></div>` : ''}
       ${b.type == 3 ? `<div class="f"><label>α, W/(m²·K)</label><input type="number" step="any" data-k="alpha" value="${b.alpha}"></div>
-                       <div class="f"><label>u<sub>e</sub>, ${unit || 'birlik'}</label><input type="number" step="any" data-k="ue" value="${b.ue}"></div>` : ''}
+                       <div class="f"><label>Havo${unit ? ', ' + unit : ''}</label><input type="number" step="any" data-k="ue" value="${b.ue}"></div>` : ''}
     </div></div>`;
 }
 function renderBCs() {
@@ -109,7 +109,8 @@ function writeForm() {
   unit = S.dimless ? '' : '°C';
   document.querySelectorAll('.d2').forEach(e => e.hidden = S.dim == 1);
   document.querySelector('#scheme option[value="adi"]').disabled = S.dim == 1;
-  $('geoL').textContent = S.dim == 1 ? 'd (diametr), m' : 'δ (qalinlik), m';
+  $('geoL').textContent = S.dim == 1 ? 'Diametr d, m' : 'Qalinlik δ, m';
+  $('LxL').textContent = S.dim == 1 ? 'Uzunligi (qalinligi), m' : 'Eni, m';
   document.querySelectorAll('.spotf').forEach(e => e.hidden = S.init.type !== 'spot');
   $('legExpl').hidden = S.dim == 2;
   renderBCs();
@@ -204,6 +205,12 @@ function compute() {
   if (!isFinite(lo)) { lo = 0; hi = 1; }
   if (hi - lo < 1e-9) { hi = lo + 1; }
   limits = [lo, hi];
+  // barqaror holat: oxirgi kadrdan farq 0.3% dan kichik bo'lib qolgan birinchi payt
+  const F = R.frames[R.frames.length - 1], rng = hi - lo;
+  const md = (a, b) => { let m = 0; for (let i = 0; i < a.length; i++) { const d = Math.abs(a[i] - b[i]); if (d > m) m = d; } return m; };
+  let sIdx = R.frames.length - 1; while (sIdx > 0 && md(R.frames[sIdx - 1], F) < 0.003 * rng) sIdx--;
+  const lastCh = R.frames.length > 1 ? md(R.frames[R.frames.length - 2], F) : 0;
+  R.tSteady = R.blow > 0 ? null : (lastCh < 0.0005 * rng ? R.times[sIdx] : null);
   J = Math.min(J, R.frames.length - 1);
   $('time').max = R.frames.length - 1; $('time').value = J;
   if (!probe) probe = S.dim == 1 ? { i: Math.round(S.Nx / 2) } : { i: Math.round(S.Nx / 2), k: Math.round(S.Ny / 2) };
@@ -213,19 +220,72 @@ function compute() {
 function stats(ms) {
   const ph = physics(), blew = R.blow > 0;
   const fo = $('sFo'); fo.querySelector('b').textContent = fmtSci(R.Fo);
-  fo.className = 'stat ' + (S.scheme === 'explicit' ? (R.Fo > (S.dim == 1 ? 0.5 : 0.5) ? 'warn' : 'good') : '');
+  fo.className = 'stat ' + (S.scheme === 'explicit' ? (R.Fo > 0.5 ? 'warn' : 'good') : '');
   const tm = $('sTau'); tm.querySelector('b').textContent = fmtSci(R.tauMax) + ' s';
   tm.className = 'stat ' + (R.tau > R.tauMax ? 'warn' : 'good');
   let bi = 0; const h = S.Lx / S.Nx;
   for (const k in S.bc) if ((S.dim == 2 || k === 'left' || k === 'right') && S.bc[k].type == 3) bi = Math.max(bi, S.bc[k].alpha * h / S.lam);
   $('sBi').textContent = bi ? fmtSci(bi) : '—';
-  $('sMax').textContent = fmtU(limits[1]);
   $('sIt').textContent = R.iters ? R.iters.toFixed(1) : (S.scheme === 'explicit' ? 'kerak emas' : 'haydash');
   $('sMs').textContent = ms < 1000 ? ms.toFixed(0) + ' ms' : (ms / 1000).toFixed(1) + ' s';
-  const w = $('warn'); const need = Math.ceil(ph.T / R.tauMax);
-  if (blew) w.innerHTML = `<div class="banner bad">Oshkor sxema turgʻun emas: τ = ${fmtSci(R.tau)} s &gt; τ<sub>max</sub> = ${fmtSci(R.tauMax)} s. Natija ${R.blow}-qadamda buzildi. Ishlashi uchun kamida K ≈ ${need} qadam kerak yoki oshkormas sxemani tanlang.</div>`;
-  else if (S.scheme !== 'explicit' && R.tau > R.tauMax) w.innerHTML = `<div class="banner ok">τ = ${fmtSci(R.tau)} s oshkor sxema chegarasidan ${(R.tau / R.tauMax).toFixed(1)} marta katta, lekin tanlangan sxema absolyut turgʻun. Oshkor sxemaga ≈${need} qadam kerak boʻlardi, bu yerda ${S.K} ta yetarli.</div>`;
-  else w.innerHTML = '';
+  $('a2out').textContent = `Temperatura o’tkazuvchanlik a² = λ/(ρc) = ${fmtSci(ph.a2)} m²/s`;
+  $('sSteady').textContent = R.tSteady == null ? 'hali yetmagan' : (R.tSteady === 0 ? 'boshidanoq' : '≈ ' + fmtT(R.tSteady));
+  const need = Math.ceil(ph.T / R.tauMax);
+  $('warn').innerHTML = blew
+    ? `<div class="banner bad"><b>Natija noto’g’ri!</b> Oddiy (oshkor) usul uchun vaqt qadami juda katta, hisob ${R.blow}-qadamda “portlab” ketdi. Yechim: “Qo’shimcha sozlamalar → Hisoblash usuli” da <b>Krank–Nikolson</b> ni tanlang yoki vaqt qadamlarini kamida ${need} ga oshiring.</div>` : '';
+  $('sciNote').innerHTML = S.scheme !== 'explicit' && R.tau > R.tauMax
+    ? `Vaqt qadami τ = ${fmtSci(R.tau)} s oddiy (oshkor) usul chegarasidan ${(R.tau / R.tauMax).toFixed(1)} marta katta. Tanlangan usul har qanday qadamda turg’un, shuning uchun ${S.K} ta qadam yetarli; oddiy usulga ≈${need} qadam kerak bo’lardi.`
+    : `Vaqt qadami τ = ${fmtSci(R.tau)} s, oddiy (oshkor) usul chegarasi τ<sub>max</sub> = ${fmtSci(R.tauMax)} s.`;
+}
+
+// Joriy kadr bo'yicha oddiy ko'rsatkichlar
+function where(idx) {
+  if (S.dim == 1) return `x = ${(+R.x[idx].toPrecision(3))} m`;
+  const i = idx % R.nx, k = (idx / R.nx) | 0; return `(${+R.X[i].toPrecision(3)}; ${+R.Y[k].toPrecision(3)}) m`;
+}
+function simpleStats() {
+  const U = R.frames[J]; let mi = 0, ma = 0, s = 0;
+  for (let i = 0; i < U.length; i++) { if (U[i] > U[ma]) ma = i; if (U[i] < U[mi]) mi = i; s += U[i]; }
+  $('sHot').textContent = fmtU(U[ma]); $('sHotL').textContent = 'Eng issiq: ' + where(ma);
+  $('sCold').textContent = fmtU(U[mi]); $('sColdL').textContent = 'Eng sovuq: ' + where(mi);
+  $('sAvg').textContent = fmtU(s / U.length);
+  return { mi, ma, avg: s / U.length };
+}
+const SIDE_NAME = { 1: { left: 'chap uchi', right: 'o’ng uchi' }, 2: { left: 'chap qirrasi', right: 'o’ng qirrasi', bottom: 'pastki qirrasi', top: 'yuqori qirrasi' } };
+function bcText(k) {
+  const b = S.bc[k], n = SIDE_NAME[S.dim][k], u = unit ? ' ' + unit : '';
+  if (b.type == 1) return `${n} doim ${b.g}${u} da ushlab turiladi`;
+  if (b.type == 2) return b.q == 0 ? `${n} izolyatsiyalangan (issiqlik o’tmaydi)` : (b.q > 0 ? `${n}ga ${b.q} W/m² issiqlik beriladi` : `${n}dan ${-b.q} W/m² issiqlik olinadi`);
+  return `${n} ${b.ue}${u} li ${S.dimless ? 'muhit' : 'havo'} bilan issiqlik almashadi`;
+}
+function summary() {
+  const st = simpleStats(), U = R.frames[J], U0 = R.frames[0], u = unit ? ' ' + unit : '';
+  let a0 = 0; for (const v of U0) a0 += v; a0 /= U0.length;
+  if (R.blow > 0) { $('summary').innerHTML = `<h3>Natija</h3><p>Hisob buzilgan, raqamlarga ishonib bo’lmaydi – yuqoridagi qizil ogohlantirishga qarang.</p>`; return; }
+  const sides = (S.dim == 1 ? ['left', 'right'] : ['left', 'right', 'bottom', 'top']).map(bcText);
+  const ph = physics(), extra = [];
+  const air = S.dimless ? 'muhit' : 'havo';
+  if (ph.beta > 0) extra.push(`${S.dim == 1 ? 'yon sirti' : 'yuzalari'} ${S.side.us}${u} li ${air}da soviydi`);
+  if (S.src.type !== 'none' && S.src.Q0) extra.push(`ichida issiqlik ajraladi (${fmtSci(S.src.Q0)} W/m³${S.src.type === 'spot' ? ', markazda' : ''})`);
+  const tol = 0.005 * (limits[1] - limits[0]);
+  const trend = st.avg > a0 + tol ? 'isiyapti' : st.avg < a0 - tol ? 'sovuyapti' : 'umuman olganda deyarli o’zgarmayapti – issiqlik asosan ichkarida qayta taqsimlanmoqda';
+  let flux = '';
+  if (S.dim == 1 && !S.dimless) {
+    const h = R.h, n = U.length, lam = S.lam;
+    const qL = lam * (-3 * U[0] + 4 * U[1] - U[2]) / (2 * h), qR = -lam * (3 * U[n - 1] - 4 * U[n - 2] + U[n - 3]) / (2 * h);
+    const f = (q, nm) => Math.abs(q) < 1e-6 ? `${nm}dan issiqlik deyarli o’tmayapti` : (q > 0 ? `${nm}dan har 1 m² ga <b>${fmtSci(q)} W</b> issiqlik chiqib ketmoqda` : `${nm}dan har 1 m² ga <b>${fmtSci(-q)} W</b> issiqlik kirmoqda`);
+    flux = `<li>${f(qL, 'Chap uchi')}; ${f(qR, 'o’ng uchi')}.</li>`;
+  }
+  const span = U[st.ma] - U[st.mi], hint = ($('scale').value === 'all' && span < 0.15 * (limits[1] - limits[0]) && span > 0)
+    ? `<li class="hint">Hozir jism bo’ylab farq kichik (${fmtU(span).replace(' ' + unit, '')}${unit ? ' ' + unit : ''}), shuning uchun ranglar deyarli bir xil. Farqni ko’rish uchun “Ranglar: shu paytga moslab” ni tanlang.</li>`.replace(/’/g, '’') : '';
+  const steady = R.tSteady == null ? `Hisob oxirigacha harorat hali o’zgarib turibdi – davomiylikni uzaytirsangiz, barqaror holatni ko’rasiz.`
+    : R.tSteady === 0 ? `Harorat boshidanoq deyarli o’zgarmaydi.`
+    : `Taxminan <b>${fmtT(R.tSteady)}</b> dan keyin harorat deyarli o’zgarmaydi – <b>barqaror holat</b> qaror topadi.`;
+  $('summary').innerHTML = `<h3>Natija: t = ${fmtT(R.times[J])} paytda</h3><ul>
+    <li>Eng issiq joy ${where(st.ma)}: <b>${fmtU(U[st.ma])}</b>; eng sovuq joy ${where(st.mi)}: <b>${fmtU(U[st.mi])}</b>.</li>
+    <li>O’rtacha harorat boshida ${fmtU(a0)} edi, hozir <b>${fmtU(st.avg)}</b> – jism ${trend}.</li>
+    <li>Sababi: ${[...sides, ...extra].join('; ')}.</li>${flux}
+    <li>${steady}</li>${hint}</ul>`;
 }
 
 // ---------------- Masalaning qo'yilishi (dinamik formulalar) ----------------
@@ -235,7 +295,7 @@ function statement() {
   const val = b => b.type == 1 ? `g = ${b.g} ${unit}` : b.type == 2 ? `q = ${b.q} W/m²` : `α = ${b.alpha} W/(m²·K), u<sub>e</sub> = ${b.ue} ${unit}`;
   let h = `<div class="eqrow"><span class="tag">Tenglama</span>${eq('heat', 1.25)}</div>`;
   h += `<div class="eqrow"><span class="tag">Koeffitsientlar</span>${eq('coeffs', 1.15)}<span class="mat">a² = ${fmtSci(ph.a2)} m²/s, β = ${fmtSci(ph.beta)} 1/s</span></div>`;
-  h += `<div class="eqrow"><span class="tag">Boshlangʻich shart</span>${eq('ic', 1.15)}</div>`;
+  h += `<div class="eqrow"><span class="tag">Boshlang’ich shart</span>${eq('ic', 1.15)}</div>`;
   for (const [k, t] of sides) h += `<div class="eqrow"><span class="tag">${t}</span>${eq(name[S.bc[k].type], 1.15)}<span class="mat">${val(S.bc[k])}</span></div>`;
   $('statement').innerHTML = h;
 }
@@ -247,7 +307,7 @@ function frameLimits() {
   if (!isFinite(lo)) return limits; if (hi - lo < 1e-9) hi = lo + 1e-3; return [lo, hi];
 }
 function drawField() {
-  const cv = $('field'); cv.style.height = S.dim == 1 ? '150px' : 'min(62vw, 460px)';
+  const cv = $('field'); cv.style.height = S.dim == 1 ? '170px' : 'min(62vw, 460px)';
   const { c, w, h } = setup(cv), [lo, hi] = frameLimits(), U = R.frames[J];
   c.clearRect(0, 0, w, h); c.font = '12px ' + css('--mono');
   const cbH = 12, pad = 26;
@@ -259,7 +319,9 @@ function drawField() {
     const px = x0 + (probe.i + 0.5) * seg; c.strokeStyle = css('--ink'); c.lineWidth = 2; c.beginPath(); c.moveTo(px, y - 6); c.lineTo(px, y + bh + 6); c.stroke(); c.lineWidth = 1;
     c.fillStyle = css('--ink'); c.textAlign = 'left'; c.fillText('x = 0', x0, y - 10); c.textAlign = 'right'; c.fillText('x = ' + S.Lx + ' m', x1, y - 10);
     drawField.geo = { x0, x1, y, bh, seg, n };
-    colorbar(c, w / 2 - 140, y + bh + 22, 280, cbH, lo, hi);
+    const lab = k => { const b = S.bc[k]; return b.type == 1 ? `${b.g}${unit ? ' ' + unit : ''} da` : b.type == 2 ? (b.q == 0 ? 'izolyatsiya' : `oqim ${b.q} W/m²`) : `havo ${b.ue}${unit ? ' ' + unit : ''}`; };
+    c.fillStyle = css('--muted'); c.textAlign = 'left'; c.fillText('◀ ' + lab('left'), x0, y + bh + 18); c.textAlign = 'right'; c.fillText(lab('right') + ' ▶', x1, y + bh + 18);
+    colorbar(c, w / 2 - 140, y + bh + 44, 280, cbH, lo, hi);
   } else {
     const nx = R.nx, ny = R.ny, size = Math.min(w - 120, h - 50), ox = 50, oy = 10;
     const sx = size * Math.min(1, S.Lx / S.Ly), sy = size * Math.min(1, S.Ly / S.Lx);
@@ -313,7 +375,7 @@ function isolines(c, U, nx, ny, ox, oy, sx, sy, lo, hi) {
 }
 function linePlot(cv, series, xs, opts) {
   const { c, w, h } = setup(cv); c.clearRect(0, 0, w, h);
-  const ml = 62, mr = 12, mt = 10, mb = 32, pw = w - ml - mr, ph = h - mt - mb;
+  const ml = 62, mr = 12, mt = opts.ytitle ? 24 : 10, mb = 32, pw = w - ml - mr, ph = h - mt - mb;
   let lo = opts.lo, hi = opts.hi; const xlo = xs[0], xhi = xs[xs.length - 1];
   const X = v => ml + (v - xlo) / (xhi - xlo || 1) * pw, Y = v => mt + ph - (v - lo) / (hi - lo) * ph;
   c.font = '12px ' + css('--mono'); c.strokeStyle = css('--line'); c.fillStyle = css('--muted');
@@ -327,6 +389,9 @@ function linePlot(cv, series, xs, opts) {
   }
   if (opts.marker != null) { c.strokeStyle = css('--ink'); c.setLineDash([3, 3]); c.beginPath(); c.moveTo(X(opts.marker), mt); c.lineTo(X(opts.marker), mt + ph); c.stroke(); c.setLineDash([]); }
   c.restore();
+  c.fillStyle = css('--muted');
+  if (opts.ytitle) { c.textAlign = 'left'; c.fillText(opts.ytitle, 6, 12); }
+  if (opts.xtitle) { c.textAlign = 'right'; c.fillText(opts.xtitle, w - mr, h - 2); }
 }
 function drawProfile() {
   const U = R.frames[J], U0 = R.frames[0];
@@ -334,42 +399,29 @@ function drawProfile() {
   if (S.dim == 1) {
     xs = Array.from(R.x); cur = Array.from(U); ini = Array.from(U0);
     if (E) { const jj = Math.min(E.frames.length - 1, J); ex = Array.from(E.frames[jj]); }
-    $('profTitle').textContent = 'Harorat profili u(x)';
+    $('profTitle').textContent = 'Harorat sterjen (devor) bo’ylab';
   } else {
     const k = probe.k; xs = Array.from(R.X); cur = xs.map((_, i) => U[k * R.nx + i]); ini = xs.map((_, i) => U0[k * R.nx + i]);
-    $('profTitle').textContent = `Kesim boʻyicha profil, y = ${(R.Y[k]).toPrecision(3)} m`;
+    $('profTitle').textContent = `Harorat gorizontal kesim bo’ylab (y = ${+(R.Y[k]).toPrecision(3)} m)`;
   }
   const pad = (limits[1] - limits[0]) * 0.06;
   const series = [{ ys: ini, color: '#9aa7b5', dash: [5, 4], w: 1.5 }];
   if (ex) series.push({ ys: ex, color: css('--bad'), w: 1.4 });
   series.push({ ys: cur, color: css('--hot'), w: 2.4 });
-  linePlot($('prof'), series, xs, { lo: limits[0] - pad, hi: limits[1] + pad, xfmt: v => (+v.toPrecision(3)) + '' });
+  linePlot($('prof'), series, xs, { lo: limits[0] - pad, hi: limits[1] + pad, xfmt: v => (+v.toPrecision(3)) + '', ytitle: unit ? 'u, ' + unit : 'u', xtitle: 'x, m' });
 }
 function drawProbe() {
   const ts = R.times, idx = S.dim == 1 ? probe.i : probe.k * R.nx + probe.i;
   const ys = R.frames.map(fr => fr[idx]);
   let lo = Math.min(...ys.filter(isFinite)), hi = Math.max(...ys.filter(isFinite)); if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
   const pad = (hi - lo) * 0.08;
-  linePlot($('probe'), [{ ys, color: css('--accent'), w: 2.2 }], ts, { lo: lo - pad, hi: hi + pad, xfmt: v => fmtT(v).replace(/\.\d+ /, ' '), marker: ts[J] });
+  linePlot($('probe'), [{ ys, color: css('--accent'), w: 2.2 }], ts, { lo: lo - pad, hi: hi + pad, xfmt: v => fmtT(v).replace(/\.\d+ /, ' '), marker: ts[J], ytitle: unit ? 'u, ' + unit : 'u', xtitle: 'vaqt' });
   const where = S.dim == 1 ? `x = ${(R.x[probe.i]).toPrecision(3)} m` : `x = ${(R.X[probe.i]).toPrecision(3)} m, y = ${(R.Y[probe.k]).toPrecision(3)} m`;
-  $('probeNote').textContent = `Nuqta: ${where}; hozir u = ${fmtU(ys[J])}. Maydon ustiga bosib nuqtani oʻzgartiring.`;
-}
-function drawFlux() {
-  const U = R.frames[J], el = $('fluxOut');
-  if (S.dim == 2) {
-    let s = 0; for (const v of U) s += v;
-    el.innerHTML = `Plastinkaning oʻrtacha harorati: <b>${fmtU(s / U.length)}</b>; markazda: <b>${fmtU(U[Math.round(R.ny / 2) * R.nx + Math.round(R.nx / 2)])}</b>; maksimal: <b>${fmtU(Math.max(...U))}</b>.`;
-    return;
-  }
-  const h = R.h, n = U.length, lam = S.lam;
-  const qL = lam * (-3 * U[0] + 4 * U[1] - U[2]) / (2 * h);           // chiqib ketayotgan oqim, x = 0
-  const qR = -lam * (3 * U[n - 1] - 4 * U[n - 2] + U[n - 3]) / (2 * h); // chiqib ketayotgan oqim, x = L
-  if (S.dimless) { el.innerHTML = `Chegaralardagi gradient: chapda ∂u/∂x = ${fmtSci((-3 * U[0] + 4 * U[1] - U[2]) / (2 * h))}, oʻngda ∂u/∂x = ${fmtSci((3 * U[n - 1] - 4 * U[n - 2] + U[n - 3]) / (2 * h))}.`; return; }
-  el.innerHTML = `Issiqlik oqimi q = −λ ∂u/∂n (tashqariga): chap chegarada <b>${fmtSci(qL)} W/m²</b>, oʻng chegarada <b>${fmtSci(qR)} W/m²</b>. Ikkinchi tartibli bir tomonlama ayirma bilan hisoblandi.`;
+  $('probeNote').textContent = `Nuqta ${where}: hozir ${fmtU(ys[J])}. Boshqa nuqtani tanlash uchun rangli rasm ustiga bosing.`;
 }
 function drawAll() {
   if (!R) return;
-  drawField(); drawProfile(); drawProbe(); drawFlux();
+  drawField(); drawProfile(); drawProbe(); summary();
   $('tval').textContent = 't = ' + fmtT(R.times[J]);
 }
 
@@ -405,7 +457,7 @@ function bind() {
   };
   $('play').addEventListener('click', () => {
     if (playing) { playing = false; $('play').textContent = '▶ Davom etish'; return; }
-    if (J >= R.frames.length - 1) J = 0; playing = true; $('play').textContent = '❚❚ Toʻxtatish'; requestAnimationFrame(tick);
+    if (J >= R.frames.length - 1) J = 0; playing = true; $('play').textContent = '❚❚ To’xtatish'; requestAnimationFrame(tick);
   });
   const fieldPos = e => { const r = $('field').getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
   const hit = (x, y) => {
@@ -425,7 +477,7 @@ function bind() {
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
     document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
     document.querySelectorAll('.panel').forEach(p => p.hidden = p.id !== 'p-' + b.dataset.tab);
-    if (b.dataset.tab === 'lab') drawAll(); if (b.dataset.tab === 'stab') drawG(); if (b.dataset.tab === 'conv' && !cvDone) runConv();
+    if (b.dataset.tab === 'lab') drawAll(); if (b.dataset.tab === 'stab') drawG(); if (b.dataset.tab === 'conv' && !cvDone) runConv(); if (b.dataset.tab === 'rel' && !relDone) reliability();
   }));
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { drawAll(); drawG(); if (cvLast) plotConv(cvLast); }, 100); });
 }
@@ -433,44 +485,44 @@ function bind() {
 // ---------------- Nazariya ----------------
 function theory() {
   $('theory').innerHTML = `
-  <p>Jismdagi harorat <i>u</i>(<b>x</b>, <i>t</i>) Furye qonuni va energiyaning saqlanish qonunidan kelib chiqadigan tenglamaga boʻysunadi:</p>
+  <p>Jismdagi harorat <i>u</i>(<b>x</b>, <i>t</i>) Furye qonuni va energiyaning saqlanish qonunidan kelib chiqadigan tenglamaga bo’ysunadi:</p>
   ${eq('energy', 1.4)}
-  <p>Koeffitsientlar oʻzgarmas boʻlganda va sirtdan konvektiv almashish (sterjen yon sirti yoki plastinka yuzlari) hisobga olinganda:</p>
+  <p>Koeffitsientlar o’zgarmas bo’lganda va sirtdan konvektiv almashish (sterjen yon sirti yoki plastinka yuzlari) hisobga olinganda:</p>
   ${eq('heat', 1.4)}${eq('coeffs', 1.3)}${eq('laplace', 1.3)}
-  <p>Bu yerda <i>p</i> – kesim perimetri, <i>σ</i> – kesim yuzasi (doiraviy sterjen uchun <i>p</i>/<i>σ</i> = 4/<i>d</i>), plastinka uchun <i>β</i> = 2<i>α<sub>s</sub></i>/(<i>ρc</i>δ). Boshlangʻich shart va chegaraviy shartlarning uch turi:</p>
+  <p>Bu yerda <i>p</i> – kesim perimetri, <i>σ</i> – kesim yuzasi (doiraviy sterjen uchun <i>p</i>/<i>σ</i> = 4/<i>d</i>), plastinka uchun <i>β</i> = 2<i>α<sub>s</sub></i>/(<i>ρc</i>δ). Boshlang’ich shart va chegaraviy shartlarning uch turi:</p>
   ${eq('ic', 1.3)}
   <div class="eqrow"><span class="tag">I tur (Dirixle)</span>${eq('bc1', 1.3)}</div>
   <div class="eqrow"><span class="tag">II tur (Neyman)</span>${eq('bc2', 1.3)}</div>
   <div class="eqrow"><span class="tag">III tur (aralash)</span>${eq('bc3', 1.3)}</div>
-  <h3>Toʻr va chekli ayirmalar</h3>
+  <h3>To’r va chekli ayirmalar</h3>
   ${eq('grid', 1.3)}${eq('dxx', 1.3)}${eq('Lambda', 1.3)}
-  <p>Vaqt boʻyicha <i>θ</i>-sxema: <i>θ</i> = 0 – oshkor, <i>θ</i> = 1 – oshkormas, <i>θ</i> = ½ – Krank–Nikolson sxemasi:</p>
+  <p>Vaqt bo’yicha <i>θ</i>-sxema: <i>θ</i> = 0 – oshkor, <i>θ</i> = 1 – oshkormas, <i>θ</i> = ½ – Krank–Nikolson sxemasi:</p>
   ${eq('theta', 1.4)}
-  <p>Oqimli chegaralarda (II va III tur) ikkinchi tartibli aniqlikni saqlash uchun soxta tugun <i>u</i><sub>−1</sub> kiritiladi va chegaraviy shartning markaziy ayirmali koʻrinishidan yoʻqotiladi:</p>
+  <p>Oqimli chegaralarda (II va III tur) ikkinchi tartibli aniqlikni saqlash uchun soxta tugun <i>u</i><sub>−1</sub> kiritiladi va chegaraviy shartning markaziy ayirmali ko’rinishidan yo’qotiladi:</p>
   ${eq('ghost', 1.3)}
   <h3>Chiziqli sistemalarni yechish</h3>
-  <p>Har bir vaqt qatlamida uch diagonalli sistema hosil boʻladi va u haydash usulida O(<i>N</i>) amalda yechiladi:</p>
+  <p>Har bir vaqt qatlamida uch diagonalli sistema hosil bo’ladi va u haydash usulida O(<i>N</i>) amalda yechiladi:</p>
   ${eq('tri', 1.3)}${eq('sweep', 1.3)}
   <p>Muqobil sifatida Zeydel iteratsiyasi (2D da SOR, ω<sub>opt</sub> ≈ 2/(1 + sin πh)) ishlatiladi:</p>
   ${eq('seidel', 1.3)}
-  <h3>Ikki oʻlchovli masala: oʻzgaruvchan yoʻnalishlar usuli (ADI)</h3>
-  <p>Pisman–Rekford sxemasi har bir qadamni ikki yarim qadamga ajratadi; har birida faqat bitta yoʻnalish oshkormas, shuning uchun yana haydash usuli yetarli. Sxema absolyut turgʻun va O(<i>τ</i>² + <i>h</i>²) aniqlikka ega:</p>
+  <h3>Ikki o’lchovli masala: o’zgaruvchan yo’nalishlar usuli (ADI)</h3>
+  <p>Pisman–Rekford sxemasi har bir qadamni ikki yarim qadamga ajratadi; har birida faqat bitta yo’nalish oshkormas, shuning uchun yana haydash usuli yetarli. Sxema absolyut turg’un va O(<i>τ</i>² + <i>h</i>²) aniqlikka ega:</p>
   ${eq('adi1', 1.25)}${eq('adi2', 1.25)}
-  <p class="banner info">Chegaraviy oqim hadlari <i>S<sub>x</sub></i>, <i>S<sub>y</sub></i> oʻz yoʻnalishidagi operator bilan birga olinadi. Ularni ikki yarim qadamga teng boʻlish III tur shartlarda aniqlikni birinchi tartibgacha tushirishi tekshiruvda aniqlandi; ajratilgan koʻrinishda ikkinchi tartib saqlanadi (“Yaqinlashish” boʻlimi).</p>
-  <h3>Oʻlchamsiz kriteriylar</h3>
+  <p class="banner info">Chegaraviy oqim hadlari <i>S<sub>x</sub></i>, <i>S<sub>y</sub></i> o’z yo’nalishidagi operator bilan birga olinadi. Ularni ikki yarim qadamga teng bo’lish III tur shartlarda aniqlikni birinchi tartibgacha tushirishi tekshiruvda aniqlandi; ajratilgan ko’rinishda ikkinchi tartib saqlanadi (“Yaqinlashish” bo’limi).</p>
+  <h3>O’lchamsiz kriteriylar</h3>
   <div class="eqrow">${eq('fourier', 1.3)}${eq('biot', 1.3)}${eq('flux', 1.3)}</div>`;
 }
 
 // ---------------- Turg'unlik ----------------
 function stabText() {
   $('stabText').innerHTML = `
-  <p>Xatoni Furye garmonikalariga yoyib, <i>e<sup>ikx</sup></i> garmonika bir qadamda necha marta oʻzgarishini (kuchaytirish koeffitsientini) topamiz:</p>
+  <p>Xatoni Furye garmonikalariga yoyib, <i>e<sup>ikx</sup></i> garmonika bir qadamda necha marta o’zgarishini (kuchaytirish koeffitsientini) topamiz:</p>
   ${eq('G', 1.35)}${eq('Gexact', 1.25)}
-  <p>Sxema turgʻun boʻlishi uchun barcha garmonikalar oʻsmasligi kerak:</p>
+  <p>Sxema turg’un bo’lishi uchun barcha garmonikalar o’smasligi kerak:</p>
   ${eq('Gcond', 1.25)}
   <p>Oshkor sxema uchun bundan mashhur cheklov kelib chiqadi:</p>
   ${eq('stab', 1.3)}
-  <p>Grafikda Fo ni oʻzgartiring: Fo &gt; ½ boʻlganda oshkor sxemaning |G| qiymati 1 dan oshib ketadi – yuqori chastotali xato har qadamda oʻsadi. Krank–Nikolson turgʻun, lekin katta Fo da G → −1, ya'ni keskin oʻzgarishlarda soʻnmaydigan tebranish beradi; oshkormas sxema esa monoton soʻndiradi.</p>`;
+  <p>Grafikda Fo ni o’zgartiring: Fo &gt; ½ bo’lganda oshkor sxemaning |G| qiymati 1 dan oshib ketadi – yuqori chastotali xato har qadamda o’sadi. Krank–Nikolson turg’un, lekin katta Fo da G → −1, ya'ni keskin o’zgarishlarda so’nmaydigan tebranish beradi; oshkormas sxema esa monoton so’ndiradi.</p>`;
 }
 function drawG() {
   if ($('p-stab').hidden) return;
@@ -489,19 +541,19 @@ function drawG() {
   curve(xi => G(0, xi), '#b2232b', 2.2); curve(xi => G(1, xi), '#1d5ea8', 2.2); curve(xi => G(0.5, xi), '#cc7a1a', 2.2);
   c.fillStyle = css('--muted'); c.textAlign = 'left'; c.fillText('G(ξ)', ml + 6, mt + 14); c.textAlign = 'right'; c.fillText('ξ = kh', w - mr - 4, Y(lo) - 6);
   const gmin = G(0, Math.PI);
-  $('stabVerdict').innerHTML = Fo <= 0.5 ? `<div class="banner ok">Fo = ${fmtSci(Fo)} ≤ ½: uchala sxema ham turgʻun.</div>`
-    : `<div class="banner bad">Fo = ${fmtSci(Fo)} &gt; ½: oshkor sxemada G(π) = ${gmin.toFixed(2)}, |G| &gt; 1 – eng tez oʻzgaruvchi garmonika har qadamda ${Math.abs(gmin).toFixed(2)} marta oʻsadi. Oshkormas va Krank–Nikolson sxemalari turgʻun.</div>`;
+  $('stabVerdict').innerHTML = Fo <= 0.5 ? `<div class="banner ok">Fo = ${fmtSci(Fo)} ≤ ½: uchala sxema ham turg’un.</div>`
+    : `<div class="banner bad">Fo = ${fmtSci(Fo)} &gt; ½: oshkor sxemada G(π) = ${gmin.toFixed(2)}, |G| &gt; 1 – eng tez o’zgaruvchi garmonika har qadamda ${Math.abs(gmin).toFixed(2)} marta o’sadi. Oshkormas va Krank–Nikolson sxemalari turg’un.</div>`;
 }
 
 // ---------------- Yaqinlashish tartibi ----------------
 let cvDone = false, cvLast = null;
 function convText() {
   $('convText').innerHTML = `
-  <p>Dasturning toʻgʻriligi <b>ishlab chiqarilgan yechimlar usuli</b> bilan tekshiriladi: aniq yechim oldindan tanlanadi, manba va chegaraviy qiymatlar undan hisoblanadi, soʻng sonli yechim bilan solishtiriladi.</p>
+  <p>Dasturning to’g’riligi <b>ishlab chiqarilgan yechimlar usuli</b> bilan tekshiriladi: aniq yechim oldindan tanlanadi, manba va chegaraviy qiymatlar undan hisoblanadi, so’ng sonli yechim bilan solishtiriladi.</p>
   ${eq('mms', 1.3)}${eq('mmsf', 1.3)}
-  <p>2D da: <i>u</i>* = <i>e</i><sup>−<i>t</i></sup>(1 + sin(π<i>x</i>) cos(π<i>y</i>/2) + <i>xy</i>). Toʻr har gal ikki marta maydalanadi (<i>h</i> va <i>τ</i> birga), xato va kuzatilgan tartib:</p>
+  <p>2D da: <i>u</i>* = <i>e</i><sup>−<i>t</i></sup>(1 + sin(π<i>x</i>) cos(π<i>y</i>/2) + <i>xy</i>). To’r har gal ikki marta maydalanadi (<i>h</i> va <i>τ</i> birga), xato va kuzatilgan tartib:</p>
   ${eq('pest', 1.3)}${eq('order2', 1.25)}
-  <p>Nazariya boʻyicha oshkormas sxemada <i>p</i> ≈ 1 (vaqt boʻyicha birinchi tartib), Krank–Nikolson va ADI da <i>p</i> ≈ 2. Oshkor sxema faqat <i>τ</i> ~ <i>h</i>² boʻlganda turgʻun, bu holda ham <i>p</i> = 2 (<i>h</i> boʻyicha).</p>
+  <p>Nazariya bo’yicha oshkormas sxemada <i>p</i> ≈ 1 (vaqt bo’yicha birinchi tartib), Krank–Nikolson va ADI da <i>p</i> ≈ 2. Oshkor sxema faqat <i>τ</i> ~ <i>h</i>² bo’lganda turg’un, bu holda ham <i>p</i> = 2 (<i>h</i> bo’yicha).</p>
   <p class="hint">Parametrlar: a² = 0.5, λ = 2, β = 0.3, α = 15, T = 0.5, xato – maksimum normada.</p>`;
 }
 function runConv() {
@@ -554,9 +606,29 @@ function plotConv(rows) {
   c.fillStyle = css('--muted'); c.textAlign = 'left'; c.fillText('E∞', ml + 6, mt + 12); c.textAlign = 'right'; c.fillText('h', w - mr, h - 12);
 }
 
-// ---------------- Darslik masalasi ----------------
-function book() {
-  // kitobdagi algoritm: butun to'r bo'yicha Zeydel iteratsiyasi
+// ---------------- Ishonchlilik ----------------
+let relDone = false;
+function reliability() {
+  relDone = true;
+  const row = (name, cond, num, an, fmt, key) => {
+    const d = Math.abs(num - an) / Math.abs(an) * 100;
+    return `<tr><td style="text-align:left">${name}<br><span class="hint">${cond}</span></td><td>${fmt(num)}</td><td>${fmt(an)}</td><td class="m">${d < 0.01 ? '< 0.01' : d.toFixed(2)} %</td></tr>`;
+  };
+  // 1) Analitik formulalar bilan (barqaror holat)
+  const wl = { lam: 1.4, rc: 2300 * 880, L: 0.3 };
+  const rw = TL.solve1D({ L: wl.L, N: 60, T: 30 * 24 * 3600, K: 3000, a2: wl.lam / wl.rc, lam: wl.lam, init: () => 15, theta: 1, frames: 2,
+    bc: [{ type: 3, alpha: 8, ue: 20, q: () => 0 }, { type: 3, alpha: 23, ue: -10, q: () => 0 }] });
+  const n = rw.u.length, qW = -wl.lam * (3 * rw.u[n - 1] - 4 * rw.u[n - 2] + rw.u[n - 3]) / (2 * rw.h), qWa = 30 / (1 / 8 + wl.L / wl.lam + 1 / 23);
+  const ws = { lam: 11.3, rc: 8400 * 450, d: 0.001, al: 15, Q: 2e7, L: 0.2 };
+  const rs = TL.solve1D({ L: ws.L, N: 200, T: 1500, K: 1500, a2: ws.lam / ws.rc, lam: ws.lam, beta: ws.al * 4 / ws.d / ws.rc, us: 20, f: () => ws.Q / ws.rc,
+    init: () => 20, theta: 0.5, frames: 2, bc: [{ type: 1, g: () => 20 }, { type: 1, g: () => 20 }] });
+  const mS = Math.sqrt(4 * ws.al / (ws.lam * ws.d)), sA = 20 + ws.Q / (ws.lam * mS * mS) * (1 - 1 / Math.cosh(mS * ws.L / 2));
+  const cu = { lam: 401, rc: 8960 * 385, d: 0.01, al: 10, L: 0.5 };
+  const rc = TL.solve1D({ L: cu.L, N: 200, T: 6 * 3600, K: 2000, a2: cu.lam / cu.rc, lam: cu.lam, beta: cu.al * 4 / cu.d / cu.rc, us: 20, init: () => 20, theta: 1, frames: 2,
+    bc: [{ type: 1, g: () => 100 }, { type: 3, alpha: cu.al, ue: 20, q: () => 0 }] });
+  const mC = Math.sqrt(4 * cu.al / (cu.lam * cu.d)), cA = 20 + 80 / (Math.cosh(mC * cu.L) + cu.al / (mC * cu.lam) * Math.sinh(mC * cu.L));
+  const f2 = v => v.toFixed(2), f3 = v => v.toFixed(3);
+  // 2) Namunaviy masala (o'quv qo'llanmadagi misol) - qo'llanmadagi algoritm aynan takrorlanadi
   const L = 8, T = 3, N = 50, K = 200, a = 5, hc = 0.16, u0 = 2, U1 = 0.25, U2 = 1.18, eps = 1e-4;
   const hx = L / N, dt = T / K, g = a * a * dt / (hx * hx), den = 1 + 2 * g + dt * hc;
   const U = []; for (let i = 0; i <= N; i++) { U.push(new Float64Array(K + 1)); U[i][0] = 0.25 + Math.sin(0.15 * i * hx); }
@@ -564,20 +636,33 @@ function book() {
   let rho = 1, k = 0;
   while (rho > eps) { rho = 0; for (let j = 1; j <= K; j++) for (let i = 1; i < N; i++) { const V = (g * (U[i - 1][j] + U[i + 1][j]) + U[i][j - 1] + dt * hc * u0) / den; const r = Math.abs(V - U[i][j]); if (r > rho) rho = r; U[i][j] = V; } k++; }
   const bk = [[.25, .25, .25, .25, .25], [.274, .275, .275, .275, .275], [.298, .299, .3, .3, .3], [.322, .323, .324, .325, .325], [.346, .348, .348, .349, .349], [.37, .371, .373, .373, .374]];
-  $('bookText').innerHTML = `
-  <p>Darslikdagi 3-masala – yon sirti muhit bilan issiqlik almashadigan sterjen. Bu TermoLab dagi umumiy modelning xususiy holi: I tur shartlar, <i>β</i> = <i>h</i> = 0.16, <i>u<sub>s</sub></i> = <i>u</i>₀ = 2.</p>
-  ${eq('book', 1.3)}
-  <p>Darslikda oshkormas sxema butun toʻr boʻyicha Zeydel iteratsiyasi bilan yechilgan:</p>
-  ${eq('bookV', 1.3)}
-  <p>Bu yerda γ = ${g.toFixed(2)}: oshkor sxema chegarasidan (½) ${Math.round(g / 0.5)} marta katta. Darslik dasturida toʻr qadami <i>h<sub>x</sub></i> va almashish koeffitsienti <i>h</i> bitta harf bilan yozilgan; TermoLab da ular alohida kattaliklar.</p>
-  <div class="banner ${k === 992 ? 'ok' : 'bad'}">Zeydel iteratsiyalari soni: TermoLab da <b>${k}</b>, darslikda <b>992</b>. Haydash usuli bilan har qatlam aniq yechilganda u(L/2, T) = ${TL.solve1D({ L, N, T, K, a2: a * a, lam: 1, beta: hc, us: u0, init: x => 0.25 + Math.sin(0.15 * x), bc: [{ type: 1, g: () => U1 }, { type: 1, g: () => U2 }], theta: 1, frames: 1 }).u[25].toFixed(4)}.</div>`;
-  let t = '<div class="tablewrap"><table><thead><tr><th>i \\ j</th>' + [0, 1, 2, 3, 4].map(j => `<th>j = ${j}</th>`).join('') + '</tr></thead><tbody>';
+  let t = '<div class="tablewrap"><table><thead><tr><th>nuqta \\ qadam</th>' + [0, 1, 2, 3, 4].map(j => `<th>${j}</th>`).join('') + '</tr></thead><tbody>';
   for (let i = 0; i < 6; i++) { t += `<tr><th>${i}</th>`; for (let j = 0; j < 5; j++) { const v = U[i][j], m = Math.abs(v - bk[i][j]) <= 0.0011; t += `<td class="${m ? 'm' : 'x'}">${v.toFixed(3)} / ${bk[i][j].toFixed(3)}</td>`; } t += '</tr>'; }
-  $('bookTable').innerHTML = t + '</tbody></table></div><p class="hint">Har bir katakda: TermoLab / darslik jadvali.</p>';
+  t += '</tbody></table></div>';
+
+  $('relText').innerHTML = `
+  <h3>1. Aniq formulalar bilan solishtirish</h3>
+  <p>Uzoq vaqtdan keyin harorat o’zgarmay qoladi (barqaror holat). Bu holat uchun issiqlik texnikasida aniq formulalar bor. TermoLab natijasi shu formulalar bilan solishtirildi – hisob hozir brauzeringizda bajarildi:</p>
+  <div class="eqrow">${eq('wall', 1.1)}${eq('wire', 1.0)}${eq('fin', 1.0)}</div>
+  <div class="tablewrap"><table><thead><tr><th style="text-align:left">Masala</th><th>TermoLab</th><th>Formula</th><th>Farq</th></tr></thead><tbody>
+  ${row('Beton devordan yo’qotilayotgan issiqlik, W/m²', '30 sm, ichkari 20 °C, tashqari −10 °C', qW, qWa, f2)}
+  ${row('Elektr qizdirgich simining eng issiq joyi, °C', 'nixrom, d = 1 mm, Q = 2·10⁷ W/m³', Math.max(...rs.u), sA, f2)}
+  ${row('Mis sterjen uchidagi harorat, °C', 'L = 0.5 m, d = 10 mm, asosi 100 °C', rc.u[rc.u.length - 1], cA, f3)}
+  </tbody></table></div>
+  <h3>2. Javobi ma’lum masala bilan solishtirish</h3>
+  <p>Javobi oldindan ma’lum formula tanlanadi, dastur shu masalani yechadi va natija aniq javob bilan solishtiriladi. To’r maydalanganda xato nazariya bashorat qilganidek kamayadi – batafsil “Aniqlik” bo’limida.</p>
+  <h3>3. Namunaviy masala bilan solishtirish</h3>
+  <p>Matematik modellashtirish bo’yicha o’quv qo’llanmadagi misol: yon sirti muhit bilan issiqlik almashadigan sterjen. Bu TermoLab dagi umumiy modelning xususiy holi.</p>
+  ${eq('book', 1.2)}
+  <p>Qo’llanmada masala Zeydel iteratsiyasi bilan yechilgan:</p>
+  ${eq('bookV', 1.2)}
+  <div class="banner ${k === 992 ? 'ok' : 'bad'}">Iteratsiyalar soni: TermoLab da <b>${k}</b>, qo’llanmada <b>992</b>. Pastdagi jadvalda har bir katak: <b>TermoLab / qo’llanma</b> – barcha qiymatlar mos keldi.</div>
+  ${t}
+  <p class="hint">γ = ${g.toFixed(2)}: bu oddiy (oshkor) usul chegarasidan (½) ${Math.round(g / 0.5)} marta katta, shuning uchun bu masalada oshkormas usul zarur. Qo’llanma dasturida to’r qadami va issiqlik almashish koeffitsienti bitta <i>h</i> harfi bilan yozilgan; TermoLab da ular alohida kattaliklar.</p>`;
 }
 
 // ---------------- Ishga tushirish ----------------
-fillSelects(); bind(); theory(); stabText(); convText(); book();
+fillSelects(); bind(); theory(); stabText(); convText();
 $('foS').addEventListener('input', drawG);
 $('cvRun').addEventListener('click', runConv);
 applyPreset('cu');

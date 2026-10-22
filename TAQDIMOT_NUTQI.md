@@ -16,7 +16,7 @@
 | 15. Xulosa | Natijalar va keyingi bosqich | 0:30 |
 
 **Jonli namoyish tartibi:** "1D · Beton devor" → issiqlik oqimini koʻrsatish → "2D · Poʻlat plastinka" → Boshlash →
-"2D · Protsessor radiatori" → "Turgʻunlik" boʻlimida Fo slayderini 1 dan oshirish → "Yaqinlashish" boʻlimida jadval.
+"2D · Protsessor radiatori" → "Turgʻunlik" boʻlimida Fo slayderini 1 dan oshirish → "Aniqlik" va "Ishonchlilik" boʻlimlari.
 
 ## Hakamlar savollari va javoblar
 

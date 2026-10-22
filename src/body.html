@@ -2,153 +2,167 @@
   <header>
     <div>
       <h1>Termo<span>Lab</span></h1>
-      <p class="sub">Issiqlik oʻtkazuvchanlik masalalarini sonli yechish uchun virtual laboratoriya: sterjen, devor, plastinka; I, II va III tur chegaraviy shartlar; oshkor, oshkormas, Krank–Nikolson va ADI sxemalari.</p>
+      <p class="sub">Jism ichida issiqlik qanday tarqalishini ko’rsatadigan virtual laboratoriya: sterjen, devor va plastinka uchun haroratni vaqt bo’yicha hisoblaydi.</p>
     </div>
   </header>
 
-  <nav class="tabs" role="tablist" aria-label="Boʻlimlar">
+  <nav class="tabs" role="tablist" aria-label="Bo’limlar">
     <button role="tab" data-tab="lab" aria-selected="true">Laboratoriya</button>
-    <button role="tab" data-tab="theory" aria-selected="false">Matematik model</button>
-    <button role="tab" data-tab="stab" aria-selected="false">Turgʻunlik</button>
-    <button role="tab" data-tab="conv" aria-selected="false">Yaqinlashish</button>
-    <button role="tab" data-tab="book" aria-selected="false">Darslik masalasi</button>
+    <button role="tab" data-tab="theory" aria-selected="false">Qanday ishlaydi</button>
+    <button role="tab" data-tab="stab" aria-selected="false">Turg’unlik</button>
+    <button role="tab" data-tab="conv" aria-selected="false">Aniqlik</button>
+    <button role="tab" data-tab="rel" aria-selected="false">Ishonchlilik</button>
   </nav>
 
   <!-- ===================== LABORATORIYA ===================== -->
   <section class="panel" id="p-lab">
+    <div class="guide" id="guide">
+      <div class="gstep"><b>1</b><span><strong>Masalani tanlang</strong> yoki material, o’lcham va chegaralarni o’zingiz kiriting.</span></div>
+      <div class="gstep"><b>2</b><span><strong>▶ Boshlash</strong> tugmasini bosing – harorat vaqt o’tishi bilan qanday o’zgarishini ko’rasiz.</span></div>
+      <div class="gstep"><b>3</b><span><strong>“Natija” matnini o’qing.</strong> Rangli rasm ustiga bosib istalgan nuqtaning haroratini kuzating.</span></div>
+    </div>
     <div class="grid">
       <aside class="card" aria-label="Masala parametrlari">
-        <div class="f"><label for="preset">Tayyor masala</label><select id="preset"></select></div>
+        <div class="f"><label for="preset"><b>Tayyor masala</b></label><select id="preset"></select></div>
         <p class="hint" id="presetNote"></p>
 
-        <fieldset><legend>Geometriya</legend>
-          <div class="row">
-            <div class="f"><label for="dim">Oʻlchov</label><select id="dim"><option value="1">1D (sterjen, devor)</option><option value="2">2D (plastinka)</option></select></div>
-            <div class="f"><label for="Lx">L<sub>x</sub>, m</label><input type="number" id="Lx" step="any" min="0"></div>
+        <fieldset><legend>Jism</legend>
+          <div class="stack">
+            <div class="f"><label for="dim">Shakli</label><select id="dim"><option value="1">Sterjen / devor (1D)</option><option value="2">Plastinka (2D)</option></select></div>
+            <div class="f"><label for="mat">Material</label><select id="mat"></select></div>
           </div>
           <div class="row">
-            <div class="f d2"><label for="Ly">L<sub>y</sub>, m</label><input type="number" id="Ly" step="any" min="0"></div>
-            <div class="f"><label for="Nx">N<sub>x</sub> (boʻlaklar)</label><input type="number" id="Nx" min="4" max="400" step="1"></div>
-            <div class="f d2"><label for="Ny">N<sub>y</sub></label><input type="number" id="Ny" min="4" max="200" step="1"></div>
+            <div class="f"><label for="Lx" id="LxL">Uzunligi, m</label><input type="number" id="Lx" step="any" min="0"></div>
+            <div class="f d2"><label for="Ly">Balandligi, m</label><input type="number" id="Ly" step="any" min="0"></div>
           </div>
         </fieldset>
 
-        <fieldset><legend>Material</legend>
-          <div class="f"><label for="mat">Material</label><select id="mat"></select></div>
+        <fieldset><legend>Vaqt va boshlang’ich harorat</legend>
           <div class="row3">
-            <div class="f"><label for="lam">λ, W/(m·K)</label><input type="number" id="lam" step="any" min="0"></div>
-            <div class="f"><label for="rho">ρ, kg/m³</label><input type="number" id="rho" step="any" min="0"></div>
-            <div class="f"><label for="cc">c, J/(kg·K)</label><input type="number" id="cc" step="any" min="0"></div>
-          </div>
-          <p class="mat" id="a2out"></p>
-        </fieldset>
-
-        <fieldset><legend>Vaqt</legend>
-          <div class="row3">
-            <div class="f"><label for="Tend">T</label><input type="number" id="Tend" step="any" min="0"></div>
+            <div class="f"><label for="Tend">Davomiyligi</label><input type="number" id="Tend" step="any" min="0"></div>
             <div class="f"><label for="tunit">birlik</label><select id="tunit"><option value="1">s</option><option value="60">min</option><option value="3600">soat</option></select></div>
-            <div class="f"><label for="K">K (qadam)</label><input type="number" id="K" min="2" max="20000" step="1"></div>
+            <div class="f"><label for="T0">Boshida, °C</label><input type="number" id="T0" step="any"></div>
           </div>
         </fieldset>
 
-        <fieldset><legend>Boshlangʻich holat</legend>
-          <div class="row">
-            <div class="f"><label for="initType">Turi</label><select id="initType"><option value="uniform">Bir xil harorat</option><option value="spot">Qizdirilgan nuqta</option><option value="book">Darslik: 0.25 + sin(0.15x)</option></select></div>
-            <div class="f"><label for="T0">u₀, °C</label><input type="number" id="T0" step="any"></div>
-          </div>
-          <div class="row spotf">
-            <div class="f"><label for="dT">Δu nuqtada, °C</label><input type="number" id="dT" step="any"></div>
-            <div class="f"><label for="r0">Radius, m</label><input type="number" id="r0" step="any" min="0"></div>
-          </div>
-        </fieldset>
-
-        <fieldset><legend>Chegaraviy shartlar</legend>
+        <fieldset><legend>Chegaralar: nima bilan tutashgan?</legend>
           <div id="bcs"></div>
+          <p class="hint">“Harorat berilgan” – qizdirgich yoki muz kabi doimiy harorat. “Havo bilan almashadi” – sirt havoga issiqlik beradi yoki oladi. “Issiqlik oqimi” – berilgan quvvat; 0 bo’lsa izolyatsiya.</p>
         </fieldset>
 
-        <fieldset><legend>Sirtdan issiqlik almashish</legend>
-          <div class="row3">
-            <div class="f"><label for="as">α<sub>s</sub>, W/(m²·K)</label><input type="number" id="as" step="any" min="0"></div>
-            <div class="f"><label for="geo" id="geoL">d, m</label><input type="number" id="geo" step="any" min="0"></div>
-            <div class="f"><label for="us">u<sub>s</sub>, °C</label><input type="number" id="us" step="any"></div>
-          </div>
-          <p class="hint" id="betaOut"></p>
-        </fieldset>
-
-        <fieldset><legend>Ichki issiqlik manbai</legend>
-          <div class="row">
-            <div class="f"><label for="srcType">Turi</label><select id="srcType"><option value="none">Yoʻq</option><option value="uniform">Bir tekis (Joul isishi)</option><option value="spot">Markazda (Gauss)</option></select></div>
-            <div class="f"><label for="Q0">Q₀, W/m³</label><input type="number" id="Q0" step="any"></div>
-          </div>
-          <div class="row">
-            <div class="f"><label for="Qr">Radius, m</label><input type="number" id="Qr" step="any" min="0"></div>
-            <div class="f"><label for="Qt">Ishlash vaqti, s (0 = doim)</label><input type="number" id="Qt" step="any" min="0"></div>
-          </div>
-        </fieldset>
-
-        <fieldset><legend>Sonli usul</legend>
-          <div class="row">
-            <div class="f"><label for="scheme">Sxema</label><select id="scheme"><option value="cn">Krank–Nikolson (θ = ½)</option><option value="implicit">Oshkormas (θ = 1)</option><option value="explicit">Oshkor (θ = 0)</option><option value="adi">ADI (Pisman–Rekford)</option></select></div>
-            <div class="f"><label for="solver">Sistema yechuvchi</label><select id="solver"><option value="thomas">Haydash usuli</option><option value="seidel">Zeydel / SOR</option></select></div>
-          </div>
-        </fieldset>
+        <details class="more">
+          <summary>Qo’shimcha sozlamalar</summary>
+          <fieldset><legend>Material xossalari</legend>
+            <div class="row3">
+              <div class="f"><label for="lam">λ, W/(m·K)</label><input type="number" id="lam" step="any" min="0"></div>
+              <div class="f"><label for="rho">ρ, kg/m³</label><input type="number" id="rho" step="any" min="0"></div>
+              <div class="f"><label for="cc">c, J/(kg·K)</label><input type="number" id="cc" step="any" min="0"></div>
+            </div>
+            <p class="mat" id="a2out"></p>
+          </fieldset>
+          <fieldset><legend>Boshlang’ich holat</legend>
+            <div class="f"><label for="initType">Turi</label><select id="initType"><option value="uniform">Hamma joyda bir xil harorat</option><option value="spot">O’rtasi qizdirilgan</option><option value="book">Namunaviy: 0.25 + sin(0.15x)</option></select></div>
+            <div class="row spotf">
+              <div class="f"><label for="dT">Qo’shimcha qizish, °C</label><input type="number" id="dT" step="any"></div>
+              <div class="f"><label for="r0">Qizigan joy radiusi, m</label><input type="number" id="r0" step="any" min="0"></div>
+            </div>
+          </fieldset>
+          <fieldset><legend>Yon sirtdan sovish</legend>
+            <div class="row3">
+              <div class="f"><label for="as">α<sub>s</sub>, W/(m²·K)</label><input type="number" id="as" step="any" min="0"></div>
+              <div class="f"><label for="geo" id="geoL">d, m</label><input type="number" id="geo" step="any" min="0"></div>
+              <div class="f"><label for="us">Havo, °C</label><input type="number" id="us" step="any"></div>
+            </div>
+            <p class="hint">α<sub>s</sub> = 0 bo’lsa yon sirt o’ralgan (issiqlik chiqmaydi).</p>
+          </fieldset>
+          <fieldset><legend>Ichki issiqlik manbai</legend>
+            <div class="row">
+              <div class="f"><label for="srcType">Turi</label><select id="srcType"><option value="none">Yo’q</option><option value="uniform">Bir tekis (elektr toki)</option><option value="spot">Markazda (protsessor, lazer)</option></select></div>
+              <div class="f"><label for="Q0">Quvvat zichligi, W/m³</label><input type="number" id="Q0" step="any"></div>
+            </div>
+            <div class="row">
+              <div class="f"><label for="Qr">Radius, m</label><input type="number" id="Qr" step="any" min="0"></div>
+              <div class="f"><label for="Qt">Ishlash vaqti, s (0 = doim)</label><input type="number" id="Qt" step="any" min="0"></div>
+            </div>
+          </fieldset>
+          <fieldset><legend>Hisoblash usuli</legend>
+            <div class="row">
+              <div class="f"><label for="scheme">Sxema</label><select id="scheme"><option value="cn">Krank–Nikolson (tavsiya)</option><option value="implicit">Oshkormas</option><option value="explicit">Oshkor (oddiy)</option><option value="adi">ADI (plastinka uchun)</option></select></div>
+              <div class="f"><label for="solver">Tenglamalarni yechish</label><select id="solver"><option value="thomas">Haydash usuli</option><option value="seidel">Zeydel / SOR</option></select></div>
+            </div>
+            <div class="row3">
+              <div class="f"><label for="Nx">Bo’laklar, x</label><input type="number" id="Nx" min="4" max="400" step="1"></div>
+              <div class="f d2"><label for="Ny">Bo’laklar, y</label><input type="number" id="Ny" min="4" max="200" step="1"></div>
+              <div class="f"><label for="K">Vaqt qadamlari</label><input type="number" id="K" min="2" max="20000" step="1"></div>
+            </div>
+          </fieldset>
+        </details>
       </aside>
 
       <section class="card" aria-label="Natija">
         <div class="stats">
-          <div class="stat" id="sFo"><b>–</b><span>Furye soni Fo</span></div>
-          <div class="stat" id="sTau"><b>–</b><span>Oshkor sxema: τ<sub>max</sub></span></div>
-          <div class="stat"><b id="sBi">–</b><span>Bio soni Bi (maks.)</span></div>
-          <div class="stat"><b id="sMax">–</b><span>Maks. harorat</span></div>
-          <div class="stat"><b id="sIt">–</b><span>Iteratsiya / qatlam</span></div>
-          <div class="stat"><b id="sMs">–</b><span>Hisob vaqti</span></div>
+          <div class="stat hot"><b id="sHot">–</b><span id="sHotL">Eng issiq joy</span></div>
+          <div class="stat cold"><b id="sCold">–</b><span id="sColdL">Eng sovuq joy</span></div>
+          <div class="stat"><b id="sAvg">–</b><span>O’rtacha harorat</span></div>
+          <div class="stat"><b id="sSteady">–</b><span>Barqarorlashish vaqti</span></div>
         </div>
         <div id="warn"></div>
         <div class="viz">
           <canvas id="field" aria-label="Harorat maydoni"></canvas>
           <div class="tip" id="tip" hidden></div>
         </div>
+        <p class="hint center">Rang – harorat: <span style="color:#2a4fa8">ko’k – sovuq</span>, <span style="color:#c4401f">qizil – issiq</span>. Qora belgi – siz tanlagan nuqta (ustiga bosib o’zgartiring).</p>
         <div class="timebar">
           <button class="btn" id="play" type="button">▶ Boshlash</button>
           <input type="range" id="time" min="0" value="0" aria-label="Vaqt">
           <span class="tval" id="tval">t = 0</span>
-          <select id="scale" aria-label="Rang shkalasi" style="width:auto"><option value="all">Shkala: butun jarayon</option><option value="frame">Shkala: joriy kadr</option></select>
+          <select id="scale" aria-label="Rang shkalasi" style="width:auto"><option value="all">Ranglar: butun jarayon bo’yicha</option><option value="frame">Ranglar: shu paytga moslab</option></select>
         </div>
+        <div class="summary" id="summary"></div>
         <div class="two">
           <div class="f">
             <h3 id="profTitle">Harorat profili</h3>
             <canvas id="prof" style="height:240px" aria-label="Harorat profili"></canvas>
-            <div class="legend"><span><i style="background:var(--hot)"></i>joriy t</span><span><i style="background:#9aa7b5"></i>t = 0</span><span id="legExpl"><label><input type="checkbox" id="showExpl"> oshkor sxema bilan solishtirish</label></span></div>
+            <div class="legend"><span><i style="background:var(--hot)"></i>hozirgi payt</span><span><i style="background:#9aa7b5"></i>boshlanishi</span><span id="legExpl"><label><input type="checkbox" id="showExpl"> oddiy (oshkor) usul bilan solishtirish</label></span></div>
           </div>
           <div class="f">
-            <h3>Nuqtadagi harorat, u(t)</h3>
+            <h3>Tanlangan nuqtadagi harorat vaqt bo’yicha</h3>
             <canvas id="probe" style="height:240px" aria-label="Nuqtadagi harorat-vaqt grafigi"></canvas>
-            <p class="hint" id="probeNote">Maydon ustiga bosib nuqtani tanlang.</p>
+            <p class="hint" id="probeNote"></p>
           </div>
         </div>
-        <div class="banner info" id="fluxOut"></div>
-        <div>
-          <div class="label" style="margin-bottom:8px">Masalaning qoʻyilishi</div>
+        <details class="more">
+          <summary>Ilmiy ko’rsatkichlar va masalaning matematik qo’yilishi</summary>
+          <div class="stats sci">
+            <div class="stat" id="sFo"><b>–</b><span>Furye soni Fo = a²τ/h²</span></div>
+            <div class="stat" id="sTau"><b>–</b><span>Oshkor usul uchun τ<sub>max</sub></span></div>
+            <div class="stat"><b id="sBi">–</b><span>Bio soni Bi (maks.)</span></div>
+            <div class="stat"><b id="sIt">–</b><span>Iteratsiya / qatlam</span></div>
+            <div class="stat"><b id="sMs">–</b><span>Hisob vaqti</span></div>
+          </div>
+          <p class="note" id="sciNote"></p>
           <div class="eqs" id="statement"></div>
-        </div>
+        </details>
       </section>
     </div>
   </section>
 
-  <!-- ===================== MATEMATIK MODEL ===================== -->
+  <!-- ===================== QANDAY ISHLAYDI ===================== -->
   <section class="panel card" id="p-theory" hidden>
-    <h2>Matematik model va diskretlash</h2>
+    <h2>Qanday ishlaydi: matematik model va hisoblash usuli</h2>
+    <div class="why">Bu bo’limda dastur qaysi tenglamani yechishi va uni kompyuterda qanday hisoblashi formulalar bilan ko’rsatilgan.</div>
     <div class="prose" id="theory"></div>
   </section>
 
   <!-- ===================== TURG'UNLIK ===================== -->
   <section class="panel card" id="p-stab" hidden>
-    <h2>Fon Neyman boʻyicha turgʻunlik tahlili</h2>
+    <h2>Turg’unlik: nega oddiy usul ba’zan “portlab” ketadi?</h2>
+    <div class="why">Kompyuter vaqtni qadamlab hisoblaydi. Qadam juda katta bo’lsa, oddiy (oshkor) usulda kichik xato har qadamda o’sib, natija butunlay buziladi. Quyidagi grafikda buni o’zingiz tekshiring.</div>
     <div class="two">
       <div class="prose" id="stabText"></div>
       <div class="f">
         <div class="controls">
-          <div class="f"><label for="foS">Furye soni Fo</label><input type="range" id="foS" min="-2" max="1.5" step="0.01" value="0" style="accent-color:var(--accent)"></div>
+          <div class="f"><label for="foS">Vaqt qadami kattaligi (Furye soni Fo)</label><input type="range" id="foS" min="-2" max="1.5" step="0.01" value="0" style="accent-color:var(--accent)"></div>
           <span class="tval" id="foOut"></span>
         </div>
         <canvas id="gplot" style="height:300px" aria-label="Kuchaytirish koeffitsienti grafigi"></canvas>
@@ -163,30 +177,31 @@
     </div>
   </section>
 
-  <!-- ===================== YAQINLASHISH ===================== -->
+  <!-- ===================== ANIQLIK ===================== -->
   <section class="panel card" id="p-conv" hidden>
-    <h2>Aniq yechim bilan tekshiruv va yaqinlashish tartibi</h2>
+    <h2>Aniqlik: to’r maydalanganda xato qanchalik kamayadi?</h2>
+    <div class="why">Javobi oldindan ma’lum bo’lgan masala yechiladi va natija aniq javob bilan solishtiriladi. To’rni 2 marta maydalaganda xato 2 marta kamaysa – 1-tartib, 4 marta kamaysa – 2-tartib aniqlik.</div>
     <div class="two">
       <div class="prose" id="convText"></div>
       <div class="f">
         <div class="controls">
-          <div class="f"><label for="cvDim">Oʻlchov</label><select id="cvDim"><option value="1">1D</option><option value="2">2D</option></select></div>
+          <div class="f"><label for="cvDim">Shakl</label><select id="cvDim"><option value="1">1D</option><option value="2">2D</option></select></div>
           <div class="f"><label for="cvScheme">Sxema</label><select id="cvScheme"><option value="cn">Krank–Nikolson</option><option value="implicit">Oshkormas</option><option value="explicit">Oshkor (τ ~ h²)</option><option value="adi">ADI (2D)</option></select></div>
           <div class="f"><label for="cvBc">Chegaraviy shartlar</label><select id="cvBc"><option value="mix">Aralash (III / II / I)</option><option value="dir">Faqat I tur</option><option value="rob">Faqat III tur</option></select></div>
           <button class="btn" id="cvRun" type="button">Hisoblash</button>
         </div>
         <div id="cvTable"></div>
-        <canvas id="cvPlot" style="height:280px" aria-label="Xatoning qadamga bogʻliqligi"></canvas>
+        <canvas id="cvPlot" style="height:280px" aria-label="Xatoning qadamga bog’liqligi"></canvas>
       </div>
     </div>
   </section>
 
-  <!-- ===================== DARSLIK ===================== -->
-  <section class="panel card" id="p-book" hidden>
-    <h2>Darslikdagi 3-masala bilan solishtirish</h2>
-    <div class="prose" id="bookText"></div>
-    <div id="bookTable"></div>
+  <!-- ===================== ISHONCHLILIK ===================== -->
+  <section class="panel card" id="p-rel" hidden>
+    <h2>Ishonchlilik: dastur to’g’ri hisoblayotganini qanday bilamiz?</h2>
+    <div class="why">Har qanday hisoblash dasturi tekshirilishi kerak. TermoLab uch xil usulda tekshirilgan: aniq formulalar bilan, javobi ma’lum masala bilan va nashr qilingan namunaviy masala bilan.</div>
+    <div class="prose" id="relText"></div>
   </section>
 
-  <footer>TermoLab · Kamalov Ulugʻbek · StudEXPO-2026, UBS · <a href="https://github.com/ulugbekkamalov0829-web/termolab">GitHub</a></footer>
+  <footer>TermoLab · Kamalov Ulug’bek · StudEXPO-2026, UBS · <a href="https://github.com/ulugbekkamalov0829-web/termolab">GitHub</a></footer>
 </div>
