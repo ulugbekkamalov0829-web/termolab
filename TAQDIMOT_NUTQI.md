@@ -55,7 +55,7 @@ Oʻzgarmas material xossalari, toʻgʻri toʻrtburchak soha, chiziqli chegaraviy
 HTML, CSS, JavaScript (kutubxonasiz), Canvas grafika; Python/NumPy; formulalar matplotlib orqali SVG ga aylantirilgan. Kod GitHub'da ochiq.
 
 **Hisob qanchalik tez?**
-1D masalalar 10 ms atrofida, 2D (51×51, 200 qadam, ADI) 0.2–0.3 s — oddiy noutbukda, brauzerda.
+1D masalalar 10 ms atrofida, 2D (51×51, 200–300 qadam, ADI) 0.2–1 s — oddiy noutbukda, brauzerda.
 
 **Algoritm darslikdan-ku, sizning hissangiz nima?**
 Darslikda bitta masala, faqat I tur shart va bitta sxema. Men umumiy masalani (1D/2D, I–III tur, manba, sirtdan almashish) va toʻrtta sxemani dasturladim, turgʻunlik va yaqinlashish tahlilini, analitik tekshiruvni qoʻshdim, ADI dagi chegaraviy hadlar muammosini topib tuzatdim. Darslik masalasi esa xususiy hol sifatida aynan takrorlanadi (992 iteratsiya).
