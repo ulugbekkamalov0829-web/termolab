@@ -12,6 +12,7 @@
     <button role="tab" data-tab="theory" aria-selected="false">Qanday ishlaydi</button>
     <button role="tab" data-tab="stab" aria-selected="false">Turg’unlik</button>
     <button role="tab" data-tab="conv" aria-selected="false">Aniqlik</button>
+    <button role="tab" data-tab="cmp" aria-selected="false">Usullarni taqqoslash</button>
     <button role="tab" data-tab="rel" aria-selected="false">Ishonchlilik</button>
   </nav>
 
@@ -259,6 +260,17 @@
         <canvas id="cvPlot" style="height:280px" aria-label="Xatoning qadamga bog’liqligi"></canvas>
       </div>
     </div>
+  </section>
+
+  <!-- ===================== USULLARNI TAQQOSLASH ===================== -->
+  <section class="panel card" id="p-cmp" hidden>
+    <h2>Usullarni taqqoslash: qaysi usul eng maqbul?</h2>
+    <div class="why">Bitta masala barcha usullar bilan yechiladi va aniq javob bilan solishtiriladi. Eng maqbul usul – talab qilingan aniqlikka eng kam vaqtda erishgani.</div>
+    <div class="controls">
+      <div class="f"><label for="cmpDim">Masala</label><select id="cmpDim"><option value="1">1D – sterjen</option><option value="2">2D – plastinka</option></select></div>
+      <button class="btn" id="cmpRun" type="button">Barcha usullar bilan yechish</button>
+    </div>
+    <div id="cmpOut"></div>
   </section>
 
   <!-- ===================== ISHONCHLILIK ===================== -->

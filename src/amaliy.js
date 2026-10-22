@@ -33,6 +33,43 @@ function crossTime(ts, ys, level, rising) {
 const WALL_MATS = { gisht: ['G’isht', 0.7, 1800, 880], beton: ['Beton', 1.4, 2300, 880], gazoblok: ['Gazoblok', 0.14, 500, 1000], paxsa: ['Paxsa (loy-somon)', 0.4, 1500, 1000], yogoch: ['Yog’och', 0.12, 510, 1380] };
 const INSUL = { none: ['Yo’q', 0, 1, 1], penoplast: ['Penoplast', 0.038, 25, 1450], paxta: ['Mineral paxta', 0.04, 100, 840], ppu: ['Penopoliuretan', 0.03, 60, 1500] };
 
+// --- Beton qotishi ---
+const CEMENT = { tez: ['Tez qotuvchi (CEM I 52.5)', 400, 0.7], oddiy: ['Oddiy portlandsement (CEM I 42.5)', 350, 1.0], shlak: ['Shlakli sement (CEM III)', 260, 2.0] };  // nomi, to'liq issiqlik kJ/kg, vaqt doimiysi (kun)
+const COVER = { none: ['Yopilmagan', 15], plyonka: ['Plyonka / brezent', 9], paxta5: ['5 sm mineral paxta', 1 / (1 / 15 + 0.05 / 0.04)], paxta10: ['10 sm mineral paxta', 1 / (1 / 15 + 0.10 / 0.04)] };
+function concrete(v, coverKey, frames) {
+  const ce = CEMENT[v.cem], tau = ce[2] * 86400, a = COVER[coverKey][1];
+  const s = TL.solveLayered({ geom: 0, layers: [{ d: v.h, lam: 2.0, rho: 2400, c: 1000, n: 40, Q: v.C * ce[1] * 1000 / tau }], Qf: t => Math.exp(-t / tau),
+    inner: { type: 3, alpha: a, ue: v.Ta }, outer: { type: 3, alpha: a, ue: v.Ta }, T0: v.Tp, T: 10 * 86400, K: 960, theta: 0.5, frames });
+  const mid = Math.floor(s.x.length / 2); let Tmax = -1e9, tPeak = 0, dT = 0, TsMin = 1e9;
+  s.frames.forEach((f, j) => { if (f[mid] > Tmax) { Tmax = f[mid]; tPeak = s.times[j]; } dT = Math.max(dT, f[mid] - f[0]); TsMin = Math.min(TsMin, f[0]); });
+  return { s, Tmax, tPeak, dT, TsMin };
+}
+// --- Konserva: chekli silindr = cheksiz silindr x tekis plastinka (Nyuman ko'paytmasi) ---
+const CAN_FOOD = { gosht: ['Go’sht konservasi', 0.48, 1080, 3300], loviya: ['Loviya / no’xat (sho’rvada)', 0.60, 1050, 3800], qoziqorin: ['Qo’ziqorin', 0.55, 1000, 3900] };
+const CAN_MODE = { '100': ['Qaynoq suvda (100 °C)', 100], '115': ['Avtoklavda (115 °C)', 115], '121': ['Avtoklavda (121 °C)', 121] };
+const CAN_SIZES = { '0.5': [0.085, 0.100], '1': [0.100, 0.140], '3': [0.150, 0.190] };   // ichki diametr, to'ldirilgan balandlik
+function canGeom(v, mode) {
+  const [D, H] = CAN_SIZES[v.size], f = CAN_FOOD[v.food], Tm = CAN_MODE[mode || v.mode][1];
+  const wall = v.box === 'glass' ? 0.004 / 1.0 : 0.0003 / 50, a = Tm >= 110 ? 2000 : 800;       // shisha devor qarshiligi; bug' / suv
+  return { R: D / 2, H, lam: f[1], rho: f[2], c: f[3], alpha: 1 / (1 / a + wall), nr: 13, nz: 11 };
+}
+function canTheta(g, T, dt = 15) {  // birlik sakrashga javob: theta(r,z,t) = theta_r(r,t) * theta_z(z,t)
+  const K = Math.round(T / dt), o = { inner: { type: 2, q: 0 }, outer: { type: 3, alpha: g.alpha, ue: 0 }, T0: 1, T: K * dt, K, theta: 0.5, frames: K };
+  const r = TL.solveLayered(Object.assign({ geom: 1, r0: 0, layers: [{ d: g.R, lam: g.lam, rho: g.rho, c: g.c, n: g.nr - 1 }] }, o));
+  const z = TL.solveLayered(Object.assign({ geom: 0, r0: 0, layers: [{ d: g.H / 2, lam: g.lam, rho: g.rho, c: g.c, n: g.nz - 1 }] }, o));
+  return { r, z, K, dt };
+}
+// Superpozitsiya: t=0 da muhit T0 -> Tm, jh-qadamda Tm -> 30 °C (sovitish suvi)
+const canT = (th, j, i, kk, T0, Tm, jh) => {
+  let T = T0 + (Tm - T0) * (1 - th.r.frames[j][i] * th.z.frames[j][kk]);
+  if (j > jh) T += (30 - Tm) * (1 - th.r.frames[j - jh][i] * th.z.frames[j - jh][kk]);
+  return T;
+};
+const canCenter = (th, T0, Tm, jh) => { const o = new Float64Array(th.K + 1); for (let j = 0; j <= th.K; j++) o[j] = canT(th, j, 0, 0, T0, Tm, jh); return o; };
+const f0 = (tc, dt) => { let s = 0; for (const T of tc) s += Math.pow(10, (T - 121.1) / 10) * dt / 60; return s; };
+// --- Yong'in: Yevrokod 2 (EN 1992-1-2, 5.8-jadval, bir yo'nalishda ishlaydigan plita): [daqiqa, h mm, a mm]
+const EC2_SLAB = [[30, 60, 10], [60, 80, 20], [90, 100, 30], [120, 120, 40], [180, 150, 55], [240, 175, 65]];
+
 const SCEN = [
 {
   id: 'devor', cat: 'Qurilish', icon: 'house', title: 'Uy devori qishda',
@@ -251,6 +288,110 @@ const SCEN = [
       probeLabel: 'Payvand nuqtasi markazi', probe2: ci
     };
   }
+},
+{
+  id: 'beton', cat: 'Qurilish', icon: 'cube', title: 'Beton qotishi',
+  q: 'Qalin monolit beton qotayotganda qizib darz ketmaydimi yoki sovuqda muzlab qolmaydimi?',
+  dim: '1D', why: 'Plita yoki devorning eni qalinligidan ancha katta, issiqlik ikki yon yuzaga qarab oqadi. Shuning uchun harorat faqat qalinlik bo’ylab o’zgaradi – <b>bir o’lchovli (1D)</b> masala. Farqi: issiqlik manbai betonning o’zida – sement suv bilan reaksiyaga kirib issiqlik ajratadi (gidratatsiya).',
+  fields: [
+    { id: 'h', label: 'Konstruksiya qalinligi (plita yoki devor)', type: 'range', min: 0.2, max: 2.5, step: 0.1, unit: 'm', def: 1.2 },
+    { id: 'C', label: 'Sement miqdori', type: 'range', min: 250, max: 500, step: 10, unit: 'kg/m³', def: 400 },
+    { id: 'cem', label: 'Sement turi', type: 'select', opts: Object.entries(CEMENT).map(([k, v]) => [k, v[0]]), def: 'oddiy' },
+    { id: 'Tp', label: 'Quyilayotgan beton harorati', type: 'range', min: 5, max: 30, step: 1, unit: '°C', def: 15 },
+    { id: 'Ta', label: 'Havo harorati', type: 'range', min: -15, max: 35, step: 1, unit: '°C', def: 0 },
+    { id: 'cover', label: 'Yuzani yopish', type: 'select', opts: Object.entries(COVER).map(([k, v]) => [k, v[0]]), def: 'none' }
+  ],
+  run(v) {
+    const r = concrete(v, v.cover, 240), ce = CEMENT[v.cem], rise = v.C * ce[1] * 1000 / 2.4e6, s = r.s;
+    return {
+      sim: s, x: s.x, unitX: 'qalinlik, sm', xScale: 100, edges: [], range: [Math.min(v.Ta, v.Tp) - 2, Math.max(r.Tmax, v.Tp) + 2], focus: r.tPeak,
+      profTitle: 'Harorat konstruksiya qalinligi bo’ylab (chap va o’ng – havo tomoni)',
+      answers: [
+        { label: 'Beton markazidagi eng yuqori harorat', value: C(r.Tmax), note: `quyilgandan ${fmtTime(r.tPeak)} keyin`, verdict: r.Tmax <= 70 ? 'ok' : 'bad', vtext: r.Tmax <= 70 ? 'me’yorda (≤ 70 °C)' : '70 °C dan yuqori – keyinchalik beton ichida darz (DEF) xavfi' },
+        { label: 'Markaz va sirt farqi (eng katta)', value: `${r.dT.toFixed(1)} °C`, note: 'farq katta bo’lsa sirt cho’ziladi va darz ketadi', verdict: r.dT <= 20 ? 'ok' : r.dT <= 25 ? 'info' : 'bad', vtext: r.dT <= 20 ? 'termik darz xavfi past (≤ 20 °C)' : r.dT <= 25 ? 'chegarada – yuzani yoping' : 'termik darz ketish xavfi katta' },
+        { label: 'Sirtning eng past harorati', value: C(r.TsMin), verdict: r.TsMin >= 5 ? 'ok' : r.TsMin >= 0 ? 'info' : 'bad', vtext: r.TsMin >= 5 ? 'qotish uchun yetarli' : r.TsMin >= 0 ? 'sekin qotadi – isitish yoki yopish kerak' : 'sirt muzlaydi – beton mustahkamligini yo’qotadi' },
+        { label: 'Sement ajratadigan issiqlik', value: `+${rise.toFixed(0)} °C`, note: 'issiqlik tashqariga chiqmasa beton shuncha qizigan bo’lardi' }
+      ],
+      explain: `Sement suv bilan birikkanda issiqlik ajraladi: birinchi kunlarda ko’p, keyin kamayib boradi. Qalin betonning o’rtasi issiqlikni sekin chiqaradi va qiziydi, sirti esa havoda soviydi. Farq katta bo’lsa sirt qisqarishga intiladi, ichki qism esa yo’l bermaydi – darz ketadi. Yuzani yopish farqni kamaytiradi, lekin markaz biroz ko’proq qiziydi. (Gidratatsiya tezligining haroratga bog’liqligi soddalashtirilgan.)`,
+      model: (u, col) => Models3D.wall(s.x, u, col, [], [{ x: -0.3 * v.h, y: 0.2, z: 0.95, t: `Havo ${v.Ta} °C` }, { x: v.h / 2, y: 0.78, z: 0, t: 'markaz' }]),
+      probeLabel: 'Beton markazi', probeIdx: Math.floor(s.x.length / 2), floor: -0.64
+    };
+  }
+},
+{
+  id: 'yongin', cat: 'Yong’in xavfsizligi', icon: 'flame', title: 'Temir-beton plita yong’inda',
+  q: 'Yong’in paytida qavatlararo plita necha daqiqa chidaydi – armatura qizib ketmaydimi, yuqori qavatga issiqlik o’tmaydimi?',
+  dim: '1D (nochiziqli)', why: 'Yong’in plitaning butun pastki yuzasini isitadi, plita eni qalinligidan ancha katta – <b>bir o’lchovli (1D)</b> masala. Lekin bu yerda <b>nochiziqli</b>: betonning issiqlik o’tkazuvchanligi va sig’imi harorat bilan o’zgaradi, olov sirtga nurlanish (∼T⁴) orqali issiqlik beradi.',
+  fields: [
+    { id: 'h', label: 'Plita qalinligi', type: 'range', min: 60, max: 300, step: 10, unit: 'mm', def: 120 },
+    { id: 'a', label: 'Pastdan armatura o’qigacha masofa', type: 'range', min: 10, max: 70, step: 5, unit: 'mm', def: 25 },
+    { id: 'R', label: 'Talab qilinadigan chidamlilik', type: 'select', opts: [['30', '30 daqiqa'], ['60', '60 daqiqa'], ['90', '90 daqiqa'], ['120', '120 daqiqa'], ['180', '180 daqiqa']], def: '90' },
+    { id: 'moist', label: 'Beton namligi', type: 'select', opts: [['0', 'Quruq'], ['1.5', 'O’rtacha (1.5 %)'], ['3', 'Nam (3 %)']], def: '1.5' }
+  ],
+  run(v) {
+    const h = v.h / 1000, N = Math.round(h / 0.002) + 1, Treq = +v.R * 60;
+    const ia = Math.min(N - 2, Math.round(v.a / 2)), a = ia * 0.002;
+    const sim = TL.fireSlab({ h, N, T: 240 * 60, dt: 10, moist: +v.moist, frames: 240 });
+    const ts = sim.times, reb = sim.frames.map(f => f[ia]), back = sim.frames.map(f => f[N - 1]);
+    const tR = crossTime(ts, reb, 500, true), tI = crossTime(ts, back, 160, true);
+    const jR = Math.round(Treq / (ts[1] - ts[0]));
+    const okR = tR == null || tR >= Treq, okI = tI == null || tI >= Treq;
+    const cls = Math.min(tR ?? 1e9, tI ?? 1e9), kl = [30, 60, 90, 120, 180, 240].filter(c => c * 60 <= cls).pop();
+    return {
+      sim, x: sim.x, unitX: 'qalinlik, mm', xScale: 1000, edges: [a], range: [20, 1100], focus: Treq,
+      profTitle: 'Harorat plita qalinligi bo’ylab (chap – yong’in, o’ng – yuqori qavat)',
+      answers: [
+        { label: `Armatura harorati ${v.R} daqiqada`, value: C(reb[jR]), note: 'po’lat 500 °C dan oshsa mustahkamligining yarmini yo’qotadi', verdict: reb[jR] < 500 ? 'ok' : 'bad', vtext: reb[jR] < 500 ? 'armatura ishlaydi' : 'armatura haddan tashqari qizigan' },
+        { label: 'Yuk ko’tarish bo’yicha chidamlilik (R)', value: tR ? `${Math.floor(tR / 60)} daqiqa` : '240 daqiqadan ko’p', note: 'armatura 500 °C ga yetguncha', verdict: okR ? 'ok' : 'bad', vtext: okR ? 'talab bajarildi' : `talabdan (${v.R} daq) kam` },
+        { label: 'Issiqlik izolyatsiyasi bo’yicha (I)', value: tI ? `${Math.floor(tI / 60)} daqiqa` : '240 daqiqadan ko’p', note: 'yuqori yuza 140 °C ga qizguncha', verdict: okI ? 'ok' : 'bad', vtext: okI ? 'yuqori qavat xavfsiz' : 'yuqori qavatda yong’in tarqalish xavfi' },
+        { label: 'Plitaning yong’inga chidamlilik sinfi', value: kl ? `REI ${kl}` : 'REI 30 dan past', verdict: okR && okI ? 'ok' : 'bad', vtext: okR && okI ? 'loyiha talabiga mos' : 'loyiha talabiga mos emas' }
+      ],
+      explain: `Yong’in standart egri chiziq bo’yicha kuchayadi (ISO 834: 30 daqiqada 842 °C, 90 daqiqada 1006 °C). Issiqlik pastki yuzadan beton ichiga sekin kiradi. Beton himoya qatlami qanchalik qalin bo’lsa, armatura shuncha kech qiziydi. Dastlab beton ichidagi suv bug’lanib issiqlikni yutadi – grafikda 100 °C atrofidagi “to’xtash” shundan. Natijalar Yevrokod 2 (EN 1992-1-2) jadvallari bilan solishtirilgan – yechim bo’limiga qarang.`,
+      model: (u, col) => Models3D.wall(sim.x, u, col, [a], [{ x: -0.3 * h, y: 0.2, z: 0.95, t: 'Yong’in' }, { x: 1.3 * h, y: 0.2, z: 0.95, t: 'Yuqori qavat' }, { x: a, y: 0.78, z: 0, t: 'armatura' }]),
+      probeLabel: 'Armatura', probeIdx: ia, floor: -0.64
+    };
+  }
+},
+{
+  id: 'konserva', cat: 'Oziq-ovqat', icon: 'jar', title: 'Konserva sterilizatsiyasi',
+  q: 'Bankadagi konserva yetarlicha qizidimi – botulizm bakteriyalari nobud bo’ladimi?',
+  dim: '2D (r, z)', why: 'Banka – kalta silindr: issiqlik ham yon devordan, ham ust va ostidan kiradi. Harorat radius va balandlikka bog’liq – <b>ikki o’lchovli (2D)</b> masala. Eng sekin isiydigan nuqta – banka markazi. Masala chiziqli bo’lgani uchun 2D yechim ikki 1D yechimning ko’paytmasi sifatida aniq topiladi (Nyuman usuli).',
+  fields: [
+    { id: 'food', label: 'Mahsulot', type: 'select', opts: Object.entries(CAN_FOOD).map(([k, v]) => [k, v[0]]), def: 'gosht' },
+    { id: 'size', label: 'Banka hajmi', type: 'select', opts: [['0.5', '0.5 litr'], ['1', '1 litr'], ['3', '3 litr']], def: '1' },
+    { id: 'box', label: 'Idish', type: 'select', opts: [['glass', 'Shisha banka'], ['tin', 'Tunuka banka']], def: 'glass' },
+    { id: 'mode', label: 'Qizdirish usuli', type: 'select', opts: Object.entries(CAN_MODE).map(([k, v]) => [k, v[0]]), def: '100' },
+    { id: 'T0', label: 'Bankaga solingandagi harorat', type: 'select', opts: [['20', 'Sovuq (20 °C)'], ['60', 'Issiq solingan (60 °C)']], def: '20' },
+    { id: 'hold', label: 'Qizdirish vaqti', type: 'range', min: 10, max: 240, step: 5, unit: 'daqiqa', def: 60 }
+  ],
+  run(v) {
+    const g = canGeom(v), T0 = +v.T0, Tm = CAN_MODE[v.mode][1], hold = v.hold * 60, cool = 40 * 60;
+    const th = canTheta(g, hold + cool), jh = Math.round(hold / th.dt);
+    const tc = canCenter(th, T0, Tm, jh), F0 = f0(tc, th.dt);
+    const { nr, nz } = g, nzF = 2 * nz - 1, every = Math.max(1, Math.round(th.K / 160)), frames = [], times = [];
+    const rs = Array.from(th.r.x), zs = Array.from({ length: nzF }, (_, k) => k * g.H / (nzF - 1));
+    for (let j = 0; j <= th.K; j += every) {
+      const f = new Float64Array(nzF * nr);
+      for (let k = 0; k < nzF; k++) { const kk = Math.abs(k - (nz - 1)); for (let i = 0; i < nr; i++) f[k * nr + i] = canT(th, j, i, kk, T0, Tm, jh); }
+      frames.push(f); times.push(j * th.dt);
+    }
+    const mid = (nz - 1) * nr, Tmax = Math.max(...tc), tUp = crossTime(tc.map((_, j) => j * th.dt), tc, Tm - 2, true);
+    const low = Tm < 110;
+    return {
+      sim: { frames, times }, x: rs, unitX: 'markazdan masofa, mm', xScale: 1000, edges: [], range: [Math.min(T0, 30), Tm], focus: hold,
+      profOf: u => u.subarray(mid, mid + nr), profTitle: 'Harorat banka o’rtasida, markazdan devorgacha (chap – markaz)',
+      answers: [
+        { label: 'Sterilizatsiya samarasi F₀ (markazda)', value: `${F0 < 10 ? F0.toFixed(2) : F0.toFixed(1)} daqiqa`, note: '121 °C dagi ekvivalent vaqt; kislotasi past mahsulot uchun kamida 3 daqiqa', verdict: F0 >= 3 ? 'ok' : 'bad', vtext: F0 >= 3 ? 'botulizmga qarshi minimal talab bajarildi' : 'yetarli emas – botulizm xavfi saqlanadi' },
+        { label: 'Markazdagi eng yuqori harorat', value: C(Tmax), note: 'banka markazi eng sekin isiydi' },
+        { label: `Markaz ${Tm - 2} °C ga qizishi`, value: tUp && tUp <= hold ? fmtTime(tUp) : 'qizdirish vaqtida yetmadi', note: 'qizdirish boshidan', verdict: tUp && tUp <= hold ? 'info' : 'bad' },
+        low ? { label: '100 °C da 1 daqiqaning ulushi', value: '0.008 daq F₀', note: 'qaynoq suvdagi 1 daqiqa 121 °C dagi atigi 0.5 soniyaga teng', verdict: 'bad', vtext: 'kislotasi past mahsulot uchun qaynoq suv yetmaydi' }
+            : { label: `${Tm} °C da 1 daqiqaning ulushi`, value: `${Math.pow(10, (Tm - 121.1) / 10).toFixed(2)} daq F₀`, note: 'har 10 °C pasayish samarani 10 marta kamaytiradi', verdict: 'info' }
+      ],
+      explain: `Banka issiq suv yoki bug’da isitiladi, issiqlik devordan markazga sekin kiradi. Bakteriyalar harorat qanchalik yuqori bo’lsa, shuncha tez nobud bo’ladi: 121 °C da 1 daqiqa 111 °C dagi 10 daqiqaga, 100 °C dagi 128 daqiqaga teng. Shuning uchun go’sht, loviya va qo’ziqorin kabi kislotasi past mahsulotlar faqat avtoklavda (bosim ostida, 115–121 °C) xavfsiz sterilizatsiya qilinadi. Bu o’quv hisob: sanoat rejimlari laboratoriya sinovi bilan tasdiqlanadi.`,
+      model: (u, col) => Models3D.jar(rs, zs, u, col, [{ p: [0, 0.82, 0], t: `${CAN_MODE[v.mode][0].split(' (')[0]} ${Tm} °C` }, { p: [0, 0, 0.3], t: 'markaz' }]),
+      probeLabel: 'Banka markazi', probeIdx: mid, floor: -0.72
+    };
+  }
 }];
 
 // ======================= YECHIM: TESKARI MASALA =======================
@@ -263,6 +404,51 @@ function chipSource(L, n, chip, P, th, rc) {
   return (x, y) => (Math.abs(x - L / 2) <= chip / 2 + 1e-12 && Math.abs(y - L / 2) <= chip / 2 + 1e-12 ? q : 0);
 }
 const SOLVE = {
+  beton(v) {
+    const keys = Object.keys(COVER), rs = keys.map(k => [k, concrete(v, k, 120)]);
+    const good = r => r.Tmax <= 70 && r.dT <= 20 && r.TsMin >= 5;
+    const cur = rs.find(([k]) => k === v.cover)[1], best = rs.find(([, r]) => good(r)), items = [];
+    if (good(cur)) items.push('Hozirgi sharoitda beton xavfsiz qotadi: markaz–sirt farqi ≤ 20 °C, markaz ≤ 70 °C, sirt muzlamaydi.');
+    else if (best) items.push(`<b>Tavsiya:</b> beton yuzasini <b>${COVER[best[0]][0].toLowerCase()}</b> bilan yoping – markaz–sirt farqi ${best[1].dT.toFixed(1)} °C, markaz ${C(best[1].Tmax)}, sirt kamida ${C(best[1].TsMin)} bo’ladi. Yopqichni kamida 5–7 kun olmang.`);
+    else {
+      const sl = CEMENT.shlak, alt = Object.assign({}, v, { cem: 'shlak' }), ra = keys.map(k => [k, concrete(alt, k, 120)]).find(([, r]) => good(r));
+      items.push(`<b>Tavsiya:</b> yopishning o’zi yetarli emas. ${ra ? `<b>${sl[0]}</b> ishlating va yuzani ${COVER[ra[0]][0].toLowerCase()} bilan yoping (farq ${ra[1].dT.toFixed(1)} °C).` : 'Sement miqdorini kamaytiring, betonni bo’laklab quying yoki ichiga sovitish quvurlari joylashtiring.'}`);
+    }
+    if (cur.TsMin < 5) items.push('Sovuq havoda betonni +5 °C dan past haroratda qoldirmang: sirt muzlasa mustahkamlik qaytmaydi.');
+    items.push(`Qalinlik ${v.h} m: qalinlik ortgan sari markaz kechroq soviydi va farq kattalashadi – 1 m dan qalin betonda harorat nazorati majburiy.`);
+    const rows = rs.map(([k, r]) => [COVER[k][0], C(r.Tmax), r.dT.toFixed(1) + ' °C', C(r.TsMin), good(r) ? 'mos' : 'mos emas']);
+    return { items, table: { cap: 'Variantlar: yuzani yopish usuliga qarab', head: ['Yopish', 'Markaz maks.', 'Farq maks.', 'Sirt min.', 'Baho'], rows } };
+  },
+  yongin(v, res) {
+    const sim = res.sim, dx = sim.x[1] - sim.x[0], dtF = sim.times[1] - sim.times[0];
+    const aReq = tmin => { const f = sim.frames[Math.round(tmin * 60 / dtF)]; for (let i = 0; i < f.length; i++) if (f[i] < 500) return i * dx * 1000; return null; };
+    const hReq = tmin => { for (let hm = 50; hm <= 300; hm += 10) { const h = hm / 1000, N = Math.round(h / 0.004) + 1, r = TL.fireSlab({ h, N, T: tmin * 60, dt: 20, moist: +v.moist, frames: 2 }); if (r.u[N - 1] < 160) return hm; } return null; };
+    const Treq = +v.R, ar = aReq(Treq), hr = hReq(Treq), items = [];
+    const ok = ar != null && v.a >= ar && hr != null && v.h >= hr;
+    items.push(ok ? `Plita ${Treq} daqiqalik yong’inga chidaydi: armatura himoya qatlami va qalinlik yetarli.`
+      : `<b>Tavsiya:</b> ${Treq} daqiqalik chidamlilik uchun ${[ar == null || v.a < ar ? `armatura o’qigacha masofani kamida <b>${ar != null ? Math.ceil(ar / 5) * 5 : '—'} mm</b> ga yetkazing (hozir ${v.a} mm)` : '', hr == null || v.h < hr ? `plita qalinligini kamida <b>${hr ?? '—'} mm</b> qiling (hozir ${v.h} mm)` : ''].filter(Boolean).join(', ')}.`);
+    items.push('Himoya qatlamini oshirishning muqobili – plitaning pastki yuzasiga yong’indan himoya suvog’i yoki bo’yoq qoplash.');
+    items.push('Model Yevrokod 2 (EN 1992-1-2) bo’yicha: beton xossalari haroratga bog’liq, olov tomonida konveksiya (25 W/m²K) va nurlanish (ε = 0.7). Jadvalda model natijasi me’yoriy jadval bilan solishtirilgan.');
+    const rows = EC2_SLAB.filter(r => r[0] <= 240).map(([t, h, a]) => { const am = t <= 240 ? aReq(t) : null, hm = hReq(t); return [`REI ${t}`, am != null ? Math.ceil(am / 5) * 5 + ' mm' : '—', a + ' mm', hm != null ? hm + ' mm' : '—', h + ' mm']; });
+    return { items, table: { cap: 'Kerakli o’lchamlar: model va Yevrokod 2 jadvali', head: ['Sinf', 'a (model)', 'a (EC2)', 'h (model)', 'h (EC2)'], rows } };
+  },
+  konserva(v) {
+    const T0 = +v.T0, items = [], cool = 40 * 60, rows = [];
+    let curNeed = null;
+    for (const m of Object.keys(CAN_MODE)) {
+      const g = canGeom(v, m), Tm = CAN_MODE[m][1], th = canTheta(g, 600 * 60 + cool, 30);
+      const F = holdMin => { const jh = Math.round(holdMin * 60 / th.dt), K = jh + Math.round(cool / th.dt); let s = 0; for (let j = 0; j <= K; j++) s += Math.pow(10, (canT(th, j, 0, 0, T0, Tm, jh) - 121.1) / 10) * th.dt / 60; return s; };
+      let need = null; for (let hm = 5; hm <= 600; hm += 5) if (F(hm) >= 3) { need = hm; break; }
+      if (m === v.mode) curNeed = need;
+      rows.push([CAN_MODE[m][0], need ? `${need} daqiqa` : '10 soatdan ko’p', F(v.hold).toFixed(2) + ' daq']);
+    }
+    const Tm = CAN_MODE[v.mode][1];
+    if (Tm < 110) items.push(`<b>Xulosa:</b> qaynoq suvda (100 °C) kislotasi past mahsulotni xavfsiz sterilizatsiya qilib bo’lmaydi – F₀ ≥ 3 uchun ${curNeed ? curNeed + ' daqiqa' : '10 soatdan ko’p'} kerak. Go’sht, loviya, qo’ziqorin konservasini faqat avtoklavda tayyorlang.`);
+    else items.push(curNeed ? `<b>Tavsiya:</b> shu banka va rejimda kamida <b>${curNeed} daqiqa</b> qizdiring (sovitish 30 °C suvda) – markazda F₀ ≥ 3 daqiqa bo’ladi${v.hold >= curNeed ? ' – hozirgi vaqt yetarli' : ''}.` : 'Bu rejimda 10 soatda ham yetarli samaraga erishilmaydi.');
+    items.push('Nordon mahsulotlar (pomidor, meva kompoti, sirkali marinad, pH < 4.6) uchun qaynoq suv yetarli – ularda botulizm bakteriyasi ko’paymaydi.');
+    items.push('Kattaroq banka ancha ko’p vaqt talab qiladi: vaqt taxminan o’lcham kvadratiga proporsional. Shishaning o’zi ham issiqlik o’tishini sekinlashtiradi. Hisobda avtoklavning qizib olish va sekin sovish vaqti hisobga olinmagan – bu zaxira beradi.');
+    return { items, table: { cap: `Kerakli qizdirish vaqti (${CAN_FOOD[v.food][0].toLowerCase()}, ${v.size} l, F₀ ≥ 3 daq)`, head: ['Usul', 'Kerakli vaqt', `${v.hold} daqiqada F₀`], rows } };
+  },
   devor(v) {
     const m = WALL_MATS[v.mat], ai = 8.7, ao = 23;
     const Rw = 1 / ai + v.d / 100 / m[1] + 1 / ao;
@@ -360,6 +546,9 @@ const ICONS = {
   pipe: '<rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 8v8M18 8v8"/><path d="M9 4c0 1 1 1 1 2s-1 1-1 2M14 4c0 1 1 1 1 2s-1 1-1 2"/>',
   egg: '<path d="M12 3c4 0 7 6 7 11a7 7 0 0 1-14 0c0-5 3-11 7-11z"/><circle cx="12" cy="14" r="3"/>',
   chip: '<rect x="6" y="6" width="12" height="12" rx="1"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+  cube: '<path d="M12 3 3 7.5v9L12 21l9-4.5v-9z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
+  flame: '<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-4 2.5-5 .3 2 1.2 3 2.5 3.5C11 9 11 6 12 3z"/>',
+  jar: '<path d="M8 3h8v3H8z"/><path d="M7 6h10l1 3v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9z"/><path d="M6 12h12"/>',
   weld: '<path d="M4 20 14 10"/><path d="M14 10l3-3 2 2-3 3z"/><path d="M18 14l2 1M17 17l1 2M20 11l2-1"/><path d="M3 21h8"/>'
 };
 const icon = k => `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
@@ -375,6 +564,7 @@ function read() {
   for (const f of cur.fields) {
     const el = $('am-' + f.id);
     v[f.id] = f.type === 'check' ? el.checked : f.type === 'select' ? el.value : parseFloat(el.value);
+    if (f.type === 'number' && !(v[f.id] >= 0)) v[f.id] = f.def;  // bo'sh yoki manfiy qiymat – standart qiymat
     if (f.type === 'range') $('am-' + f.id + '-o').textContent = el.value + ' ' + f.unit;
   }
   return v;
@@ -460,8 +650,9 @@ function drawAll() {
   // grafiklar
   if (res.sim) {
     const xs = res.x.map(x => (x - res.x[0]) * res.xScale);
-    plot($('am-prof'), xs, [{ ys: Array.from(fr[0]), c: '#9aa7b5', d: [5, 4] }, { ys: Array.from(u), c: '#c4401f', w: 2.6 }], res.range, v => (+v.toPrecision(3)) + '', res.unitX, res.edges.map(e => (e - res.x[0]) * res.xScale));
-    $('am-profT').textContent = 'Harorat ' + (cur.id === 'devor' ? 'devor qalinligi bo’ylab (chap – xona, o’ng – ko’cha)' : cur.id === 'quvur' ? 'quvur devori va izolyatsiya bo’ylab (chap – suv, o’ng – havo)' : 'markazdan qobiqqacha (chap – sarig’i, o’ng – qobiq)');
+    const pf = res.profOf || (a => a);
+    plot($('am-prof'), xs, [{ ys: Array.from(pf(fr[0])), c: '#9aa7b5', d: [5, 4] }, { ys: Array.from(pf(u)), c: '#c4401f', w: 2.6 }], res.range, v => (+v.toPrecision(3)) + '', res.unitX, res.edges.map(e => (e - res.x[0]) * res.xScale));
+    $('am-profT').textContent = res.profTitle || 'Harorat ' + (cur.id === 'devor' ? 'devor qalinligi bo’ylab (chap – xona, o’ng – ko’cha)' : cur.id === 'quvur' ? 'quvur devori va izolyatsiya bo’ylab (chap – suv, o’ng – havo)' : 'markazdan qobiqqacha (chap – sarig’i, o’ng – qobiq)');
   } else {
     const r = res.sim2, k = (r.ny - 1) / 2, xs = Array.from(r.X).map(x => x * 100);
     plot($('am-prof'), xs, [{ ys: xs.map((_, i) => fr[0][k * r.nx + i]), c: '#9aa7b5', d: [5, 4] }, { ys: xs.map((_, i) => u[k * r.nx + i]), c: '#c4401f', w: 2.6 }], res.range, v => (+v.toPrecision(3)) + '', 'markazdan o’tgan kesim, sm', []);

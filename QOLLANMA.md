@@ -16,11 +16,12 @@ Yuqorida bo’limlar:
 | **Amaliy masalalar** | hamma uchun | 5 ta real masala, javob va tavsiya |
 | Ilmiy laboratoriya | talaba, o’qituvchi, olim | istalgan 1D/2D masalani o’zi sozlaydi |
 | Qanday ishlaydi | qiziqqanlar | formulalar va usul |
+| Usullarni taqqoslash | talaba, o’qituvchi | bitta masala 6 usulda yechiladi, eng maqbuli tanlanadi |
 | Turg’unlik, Aniqlik, Ishonchlilik | mutaxassislar | dastur to’g’riligining isboti |
 
 ## 3. Amaliy masala — 6 qadam
 
-1. **Sohani tanlang** (yuqoridagi tugmalar): Qurilish, Energetika, Kundalik hayot, Elektronika, Metallurgiya.
+1. **Sohani tanlang** (yuqoridagi tugmalar): Uy devori, Issiq suv quvuri, Tuxum qaynatish, Protsessor radiatori, Payvand, Beton qotishi, Plita yong’inda, Konserva sterilizatsiyasi.
 2. **Savolni o’qing** — sarlavha ostida masala savoli va uning 1D yoki 2D ekanligi yozilgan.
 3. **Qiymatlarni kiriting** — ro’yxatdan material tanlang, slayder bilan qalinlik/haroratni o’zgartiring. Natija darhol qayta hisoblanadi, “Hisoblash” tugmasini bosish shart emas.
 4. **Javobni o’qing** — rangli kartochkalar:
@@ -32,7 +33,10 @@ Yuqorida bo’limlar:
    - quvur uchun: kerakli izolyatsiya qalinligi;
    - tuxum uchun: pishirish vaqtlari jadvali;
    - protsessor uchun: radiator qancha quvvatgacha “chidaydi”;
-   - payvand uchun: oldindan qizdirish harorati ta’siri.
+   - payvand uchun: oldindan qizdirish harorati ta’siri;
+   - beton uchun: yuzani qanday yopish kerak;
+   - yong’in uchun: kerakli himoya qatlami va plita qalinligi (Yevrokod 2 bilan solishtirilgan);
+   - konserva uchun: kerakli qizdirish vaqti (F₀ ≥ 3 daqiqa).
 6. **Hisobotni oling** — eng pastdagi “Hisobot” matnini **Nusxalash** (Telegram yoki Word’ga qo’yish uchun) yoki **Yuklab olish** (.txt fayl) tugmasi bilan saqlang.
 
 ## 4. 3D ko’rinish bilan ishlash

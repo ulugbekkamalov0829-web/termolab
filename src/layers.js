@@ -42,7 +42,7 @@
   const val = (v, t) => (typeof v === 'function' ? v(t) : (v || 0));
 
   // L matritsa (uch diagonal) va erkin had b(t)
-  function system(M, bcIn, bcOut) {
+  function system(M, bcIn, bcOut, qf) {
     const { N, G, A, x } = M;
     const lo = new Float64Array(N), di = new Float64Array(N), up = new Float64Array(N);
     for (let i = 0; i < N; i++) {
@@ -54,6 +54,7 @@
     if (bcOut.type === 3) di[N - 1] += aN * bcOut.alpha;
     const b = (t, out) => {
       out.set(M.S);
+      if (qf) { const k = qf(t); for (let i = 0; i < out.length; i++) out[i] *= k; } // vaqtga bog'liq manba (masalan, sement gidratatsiyasi)
       if (bcIn.type !== 1) out[0] += a0 * ((bcIn.type === 3 ? bcIn.alpha * val(bcIn.ue, t) : 0) + val(bcIn.q, t));
       if (bcOut.type !== 1) out[N - 1] += aN * ((bcOut.type === 3 ? bcOut.alpha * val(bcOut.ue, t) : 0) + val(bcOut.q, t));
       return out;
@@ -63,7 +64,7 @@
 
   // p = {geom, r0, layers:[{d,lam,rho,c,n,Q}], inner, outer, init(x)|T0, T, K, theta, frames}
   function solveLayered(p) {
-    const M = mesh(p), N = M.N, sys = system(M, p.inner, p.outer), tau = p.T / p.K, th = p.theta ?? 0.5;
+    const M = mesh(p), N = M.N, sys = system(M, p.inner, p.outer, p.Qf), tau = p.T / p.K, th = p.theta ?? 0.5;
     const init = p.init || (() => p.T0 || 0);
     let u = new Float64Array(N); for (let i = 0; i < N; i++) u[i] = init(M.x[i]);
     if (p.inner.type === 1) u[0] = val(p.inner.g, 0);
@@ -111,6 +112,59 @@
     const geomFactor = M.m === 0 ? 1 : M.m === 1 ? 2 * Math.PI : 4 * Math.PI;
     return M.G[0] * (u[0] - u[1]) * geomFactor;
   }
+
+  /*
+   * Yong'indagi temir-beton plita (EN 1992-1-2 bo'yicha nochiziqli masala)
+   *   rho(T) c(T) dT/dt = d/dx( lambda(T) dT/dx )
+   *   x = 0: yong'in tomoni, ISO 834 standart egri chizig'i, konveksiya + nurlanish
+   *   x = h: yong'in bo'lmagan tomon, 20 °C havo
+   * Oshkormas sxema, koeffitsientlar oldingi qatlamdan olinadi (Pikar iteratsiyasi bilan).
+   */
+  const iso834 = t => 20 + 345 * Math.log10(8 * t / 60 + 1);   // t - soniya
+  const lamC = T => { const x = Math.min(1200, Math.max(20, T)) / 100; return 1.36 - 0.136 * x + 0.0057 * x * x; };
+  function cpC(T, moist) {
+    const peak = moist >= 3 ? 2020 : moist >= 1.5 ? 1470 : 900;
+    if (T <= 100) return 900;
+    if (T <= 115) return peak;
+    if (T <= 200) return peak - (peak - 1000) * (T - 115) / 85;
+    if (T <= 400) return 1000 + (T - 200) / 2;
+    return 1100;
+  }
+  function rhoC(T, r0) {
+    if (T <= 115) return r0;
+    if (T <= 200) return r0 * (1 - 0.02 * (T - 115) / 85);
+    if (T <= 400) return r0 * (0.98 - 0.03 * (T - 200) / 200);
+    return r0 * (0.95 - 0.07 * (Math.min(T, 1200) - 400) / 800);
+  }
+  function fireSlab(p) {
+    const N = p.N || 61, h = p.h, dx = h / (N - 1), dt = p.dt || 5, K = Math.round(p.T / dt), moist = p.moist ?? 1.5, r0 = p.rho || 2300;
+    const curve = p.curve || iso834, ac = 25, em = 0.7, sg = 5.67e-8, aBack = 9;
+    let u = new Float64Array(N).fill(20);
+    const every = Math.max(1, Math.ceil(K / (p.frames || 200)));
+    const frames = [Float64Array.from(u)], times = [0], probe = p.probe != null ? [u[p.probe]] : null;
+    const lo = new Float64Array(N), di = new Float64Array(N), up = new Float64Array(N), rhs = new Float64Array(N), nx = new Float64Array(N);
+    for (let j = 0; j < K; j++) {
+      const t1 = (j + 1) * dt, Tg = curve(t1);
+      let w = u;
+      for (let it = 0; it < 2; it++) {         // Pikar: koeffitsientlarni yangi qatlam bo'yicha aniqlashtirish
+        for (let i = 0; i < N; i++) {
+          const Tm = 0.5 * (u[i] + w[i]);
+          const C = rhoC(Tm, r0) * cpC(Tm, moist) * (i === 0 || i === N - 1 ? dx / 2 : dx);
+          const gl = i > 0 ? lamC(0.5 * (w[i] + w[i - 1])) / dx : 0, gr = i < N - 1 ? lamC(0.5 * (w[i] + w[i + 1])) / dx : 0;
+          lo[i] = -gl * dt; up[i] = -gr * dt; di[i] = C + (gl + gr) * dt; rhs[i] = C * u[i];
+          if (i === 0) { const Ts = w[0] + 273.15, Gk = Tg + 273.15, hr = em * sg * (Gk * Gk + Ts * Ts) * (Gk + Ts); di[i] += (ac + hr) * dt; rhs[i] += (ac + hr) * Tg * dt; }
+          if (i === N - 1) { di[i] += aBack * dt; rhs[i] += aBack * 20 * dt; }
+        }
+        TL.thomas(lo, di, up, rhs, nx); w = Float64Array.from(nx);
+      }
+      u = w;
+      if (probe) probe.push(u[p.probe]);
+      if ((j + 1) % every === 0 || j === K - 1) { frames.push(Float64Array.from(u)); times.push(t1); }
+    }
+    const x = Array.from({ length: N }, (_, i) => i * dx);
+    return { x, frames, times, u, tau: dt, probeVals: probe };
+  }
+  TL.fireSlab = fireSlab; TL.iso834 = iso834;
 
   TL.solveLayered = solveLayered; TL.steadyLayered = steadyLayered; TL.outerFlux = outerFlux; TL.innerFlux = innerFlux; TL.layerMesh = mesh;
   root.TL = TL;

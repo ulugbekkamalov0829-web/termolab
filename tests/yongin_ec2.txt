@@ -1,0 +1,6 @@
+Sinf     a model  a EC2   h model  h EC2
+REI 60      22      20      80      80  (mm)
+REI 90      30      30     100     100  (mm)
+REI 120     38      40     120     120  (mm)
+REI 180     50      55     140     150  (mm)
+REI 240     60      65     170     175  (mm)

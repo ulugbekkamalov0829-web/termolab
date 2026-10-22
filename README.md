@@ -7,7 +7,7 @@ StudEXPO-2026 (UBS, Namangan), 1-seksiya: dasturlash va veb-ilovalar.
 
 ## Amaliy masalalar (asosiy bo’lim)
 
-Real hayotdagi savolga javob beradigan beshta virtual laboratoriya ishi — kiritiladigan qiymatlar sohaning o’z tilida, natija 3D modelda:
+Real hayotdagi savolga javob beradigan sakkizta virtual laboratoriya ishi — kiritiladigan qiymatlar sohaning o’z tilida, natija 3D modelda:
 
 | Soha | Savol | Model |
 |---|---|---|
@@ -16,6 +16,13 @@ Real hayotdagi savolga javob beradigan beshta virtual laboratoriya ishi — kiri
 | Kundalik hayot | Tuxumni necha daqiqa qaynatish kerak? | shar, 1D |
 | Elektronika | Radiator protsessorni qizib ketishdan saqlaydimi? | plastinka + manba, 2D |
 | Metallurgiya | Payvand choki qanday soviydi (t₈/₅), qachon ushlash mumkin? | plastinka, 2D |
+| Qurilish | Qalin monolit beton qotayotganda darz ketmaydimi, muzlamaydimi? | ichki manbali (gidratatsiya) plita, 1D |
+| Yong’in xavfsizligi | Temir-beton plita yong’inda necha daqiqa chidaydi (REI)? | nochiziqli 1D: λ(T), c(T), nurlanish; Yevrokod 2 bilan solishtirilgan |
+| Oziq-ovqat | Bankadagi konserva yetarlicha sterilizatsiya bo’ldimi (F₀)? | chekli silindr, 2D (r, z) — Nyuman ko’paytmasi |
+
+**Usullarni taqqoslash** bo’limi bitta masalani barcha usullar bilan yechadi (oshkor, oshkormas + haydash/Zeydel/SOR, Krank–Nikolson, ADI), aniq yechim bilan xato va hisoblash vaqtini o’lchaydi va eng maqbul usulni aniqlaydi: 1D da Krank–Nikolson + haydash, 2D da ADI.
+
+**Yong’in modeli tekshiruvi** (EN 1992-1-2, 5.8-jadval): armatura 500 °C ga yetishi uchun kerakli o’q masofasi a = 30 / 40 / 55 mm (REI 90 / 120 / 180) — jadval bilan bir xil; izolyatsiya bo’yicha kerakli qalinlik h = 80 / 100 / 120 mm (REI 60 / 90 / 120) — jadval bilan bir xil.
 
 Har bir masalada:
 - **Javob** — rangli kartochkalar (me’yorda / xavfli / ma’lumot);

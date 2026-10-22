@@ -103,6 +103,7 @@
       const s = proj(rot(lb.p)).slice(); const w = c.measureText(lb.t).width + 12;
       // yorliqlar bir-birini yopmasin: ustma-ust tushsa pastga suriladi
       for (let k = 0; k < 6 && placed.some(r => Math.abs(r[0] - s[0]) < (r[2] + w) / 2 + 4 && Math.abs(r[1] - s[1]) < 26); k++) s[1] += 28;
+      s[0] = Math.max(w / 2 + 4, Math.min(r.width - w / 2 - 4, s[0]));  // yorliq kanvasdan chiqmasin
       placed.push([s[0], s[1], w]);
       c.fillStyle = 'rgba(255,255,255,0.9)'; c.strokeStyle = 'rgba(21,32,44,0.25)';
       c.beginPath(); c.roundRect(s[0] - w / 2, s[1] - 11, w, 22, 6); c.fill(); c.stroke();
@@ -228,5 +229,33 @@
   }
 
   root.View3D = View3D;
-  root.Models3D = { wall, pipe, egg, plate };
+  // Banka (chekli silindr): rs - radius tugunlari, zs - balandlik tugunlari (pastdan), U[k*nr+i] - harorat.
+  // 3/4 qismi ko'rsatiladi: ikki kesim tekisligida (r, z) maydoni ko'rinadi.
+  function jar(rs, zs, U, colorOf, labels, glass) {
+    const nr = rs.length, nz = zs.length, R = rs[nr - 1], H = zs[nz - 1], s = 1.6 / Math.max(2 * R, H), faces = [];
+    const a0 = 2.95, a1 = a0 + 1.5 * Math.PI, na = 36;   // kesilgan chorak kuzatuvchiga qaragan
+    const P = (r, a, z) => [r * s * Math.cos(a), (z - H / 2) * s, r * s * Math.sin(a)];
+    const u = (i, k) => U[k * nr + i], cell = (i, k) => (u(i, k) + u(i + 1, k) + u(i, k + 1) + u(i + 1, k + 1)) / 4;
+    for (let m = 0; m < na; m++) {
+      const t0 = a0 + (a1 - a0) * m / na, t1 = a0 + (a1 - a0) * (m + 1) / na;
+      for (let k = 0; k < nz - 1; k++)       // yon sirt
+        faces.push(Q(P(R, t0, zs[k]), P(R, t1, zs[k]), P(R, t1, zs[k + 1]), P(R, t0, zs[k + 1]), colorOf((u(nr - 1, k) + u(nr - 1, k + 1)) / 2)));
+      for (let i = 0; i < nr - 1; i++) {     // ust va past
+        faces.push(Q(P(rs[i], t0, H), P(rs[i + 1], t0, H), P(rs[i + 1], t1, H), P(rs[i], t1, H), colorOf((u(i, nz - 1) + u(i + 1, nz - 1)) / 2)));
+        faces.push(Q(P(rs[i], t0, 0), P(rs[i + 1], t0, 0), P(rs[i + 1], t1, 0), P(rs[i], t1, 0), colorOf((u(i, 0) + u(i + 1, 0)) / 2)));
+      }
+    }
+    for (const ang of [a0, a1]) for (let k = 0; k < nz - 1; k++) for (let i = 0; i < nr - 1; i++)   // kesimlar
+      faces.push(Q(P(rs[i], ang, zs[k]), P(rs[i + 1], ang, zs[k]), P(rs[i + 1], ang, zs[k + 1]), P(rs[i], ang, zs[k + 1]), colorOf(cell(i, k)), { bias: -0.002 }));
+    // qopqoq (metall) va bo'g'iz
+    const lidR = R * 0.82, lz = H + 0.012 / s, lc = [168, 160, 120];
+    for (let m = 0; m < na; m++) {
+      const t0 = a0 + (a1 - a0) * m / na, t1 = a0 + (a1 - a0) * (m + 1) / na;
+      faces.push({ p: [P(0, 0, lz), P(lidR, t0, lz), P(lidR, t1, lz)], c: lc, edge: null });
+      faces.push(Q(P(lidR, t0, H), P(lidR, t1, H), P(lidR, t1, lz), P(lidR, t0, lz), lc));
+    }
+    return { faces, labels: labels || [] };
+  }
+
+  root.Models3D = { wall, pipe, egg, plate, jar };
 })(typeof window !== 'undefined' ? window : globalThis);
