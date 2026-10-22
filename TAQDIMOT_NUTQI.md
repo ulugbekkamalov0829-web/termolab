@@ -15,7 +15,14 @@
 | 12–14. Tekshiruv | Yaqinlashish tartibi, analitik yechimlar, darslik (992) | 1:00 |
 | 15. Xulosa | Natijalar va keyingi bosqich | 0:30 |
 
-**Jonli namoyish tartibi:** "1D · Beton devor" → issiqlik oqimini koʻrsatish → "2D · Poʻlat plastinka" → Boshlash →
+**Jonli namoyish (asosiy, 2 daqiqa) – “Amaliy masalalar” bo’limi:**
+1. *Uy devori qishda*: 38 sm g’isht → 42.8 W/m², mog’or xavfi yo’q. Izolyatsiyani “Penoplast, 5 sm” qiling → yo’qotish 65 % kamayadi. 3D modelni aylantiring.
+2. *Issiq suv quvuri*: izolyatsiyani “Yo’q” qiling → 381 W/m, suv sirti kuydiradi; qaytaring → 27.7 W/m.
+3. *Tuxum qaynatish*: o’rtacha tuxum, muzlatkichdan → 8.7 daqiqa; “Tog’da” → vaqt uzayadi.
+4. *Protsessor radiatori*: ventilyatorni o’chiring → protsessor qizib ketadi.
+5. Pastdagi “1D, 2D va 3D: farqi nimada?” blokini ko’rsating.
+
+**Ilmiy qism namoyishi:** "1D · Beton devor" → issiqlik oqimini koʻrsatish → "2D · Poʻlat plastinka" → Boshlash →
 "2D · Protsessor radiatori" → "Turgʻunlik" boʻlimida Fo slayderini 1 dan oshirish → "Aniqlik" va "Ishonchlilik" boʻlimlari.
 
 ## Hakamlar savollari va javoblar
@@ -48,6 +55,12 @@ JavaScript yadrosi va Python/NumPy versiyasi alohida yozilgan; bir xil xatolarni
 
 **Model cheklovlari?**
 Oʻzgarmas material xossalari, toʻgʻri toʻrtburchak soha, chiziqli chegaraviy shartlar. Nochiziqli λ(u), nurlanish va 3D — keyingi bosqich.
+
+**Amaliy masalalardagi natijalar qanchalik ishonchli?**
+Ko’p qatlamli devor va izolyatsiyali quvur uchun barqaror holat analitik formulalar bilan 10⁻¹³ % aniqlikda mos (tests/layers.test.js), tuxum markazi harorati Furye qatori bilan 0.1 °C gacha mos. Material xossalari o’rtacha qiymatlar, shuning uchun real natija ±10–20 % farq qilishi mumkin; payvandlash modeli soddalashtirilgan (erish issiqligi hisobga olinmagan).
+
+**Nega 3D emas, 1D/2D?**
+Devor keng, quvur uzun, tuxum simmetrik — harorat bitta yo’nalishda o’zgaradi. Radiator va list yupqa — qalinlik bo’yicha farq kichik. Shuning uchun 1D/2D natija 3D bilan deyarli bir xil, hisob esa yuzlab marta tez va brauzerda bir soniyada bajariladi. 3D ko’rinish natijani tushunarli ko’rsatish uchun.
 
 ### Dasturlash savollari
 
