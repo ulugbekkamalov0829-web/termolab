@@ -2334,7 +2334,11 @@ function init() {
   function selectReport() { const r = document.createRange(); r.selectNodeContents($('am-report')); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); $('am-copy').textContent = 'Ctrl+C bosing'; }
   $('am-dl').addEventListener('click', () => {
     const blob = new Blob(['\ufeff' + $('am-report').textContent], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `TermoLab-${cur.id}-hisobot.txt`; document.body.appendChild(a); a.click(); a.remove();
+    const name = `TermoLab-${cur.id}-hisobot.txt`;
+    const plain = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); };
+    if (window.claude && window.claude.use) {
+      window.claude.use('downloads').then(d => d ? d.save({ filename: name, data: blob }).catch(() => {}) : selectReport(), () => selectReport());
+    } else plain();
   });
   $('am-time').addEventListener('input', e => { J = +e.target.value; drawAll(); });
   let last = 0;
