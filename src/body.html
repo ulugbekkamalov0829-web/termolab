@@ -7,15 +7,58 @@
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Bo’limlar">
-    <button role="tab" data-tab="lab" aria-selected="true">Laboratoriya</button>
+    <button role="tab" data-tab="real" aria-selected="true">Amaliy masalalar</button>
+    <button role="tab" data-tab="lab" aria-selected="false">Ilmiy laboratoriya</button>
     <button role="tab" data-tab="theory" aria-selected="false">Qanday ishlaydi</button>
     <button role="tab" data-tab="stab" aria-selected="false">Turg’unlik</button>
     <button role="tab" data-tab="conv" aria-selected="false">Aniqlik</button>
     <button role="tab" data-tab="rel" aria-selected="false">Ishonchlilik</button>
   </nav>
 
-  <!-- ===================== LABORATORIYA ===================== -->
-  <section class="panel" id="p-lab">
+  <!-- ===================== AMALIY MASALALAR ===================== -->
+  <section class="panel" id="p-real">
+    <div class="cats" id="am-cats" role="group" aria-label="Soha tanlash"></div>
+    <div class="grid real">
+      <aside class="card">
+        <h2 id="am-title"></h2>
+        <p class="q" id="am-q"></p>
+        <div class="dimbox" id="am-dim"></div>
+        <div class="label">Masala shartlari</div>
+        <div class="amform" id="am-form"></div>
+      </aside>
+      <section class="card" aria-label="Javob">
+        <div class="label">Javob</div>
+        <div class="answers" id="am-ans"></div>
+        <div class="viz3d">
+          <canvas id="am-3d" aria-label="Jismning 3D ko’rinishi, rang – harorat"></canvas>
+          <div class="cb" id="am-cb"></div>
+        </div>
+        <p class="hint center">3D modelni sichqoncha (yoki barmoq) bilan aylantiring, g’ildirak bilan yaqinlashtiring. Rang – harorat: ko’k – sovuq, qizil – issiq.</p>
+        <div class="timebar">
+          <button class="btn" id="am-play" type="button">▶ Boshlash</button>
+          <input type="range" id="am-time" min="0" value="0" aria-label="Vaqt">
+          <span class="tval" id="am-tval"></span>
+        </div>
+        <p class="explain" id="am-explain"></p>
+        <div class="two">
+          <div class="f"><h3 id="am-profT"></h3><canvas id="am-prof" style="height:230px"></canvas>
+            <div class="legend"><span><i style="background:#c4401f"></i>hozirgi payt</span><span><i style="background:#9aa7b5"></i>boshlanishi</span></div></div>
+          <div class="f"><h3 id="am-probeT"></h3><canvas id="am-probe" style="height:230px"></canvas></div>
+        </div>
+      </section>
+    </div>
+    <section class="card dims">
+      <h2>1D, 2D va 3D masala: farqi nimada?</h2>
+      <div class="dimgrid">
+        <div><b>1D – bir o’lchovli</b><p>Harorat faqat bitta yo’nalishda o’zgaradi. Masalan, devor: issiqlik xonadan ko’chaga qalinlik bo’ylab o’tadi; quvur va tuxumda – markazdan tashqariga radius bo’ylab. Hisob tez va juda aniq.</p></div>
+        <div><b>2D – ikki o’lchovli</b><p>Harorat tekislikda ikki yo’nalishda (x va y) o’zgaradi. Masalan, radiator plastinkasi yoki payvandlangan list: issiqlik bir nuqtadan har tomonga tarqaladi, qalinlik bo’yicha esa deyarli bir xil.</p></div>
+        <div><b>3D – uch o’lchovli</b><p>Harorat uchala yo’nalishda o’zgaradi – murakkab shakldagi detallar. Ko’p hollarda simmetriya yoki yupqalik tufayli masala 1D yoki 2D ga keltiriladi: natija deyarli bir xil, hisob esa yuzlab marta tez.</p></div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ===================== ILMIY LABORATORIYA ===================== -->
+  <section class="panel" id="p-lab" hidden>
     <div class="guide" id="guide">
       <div class="gstep"><b>1</b><span><strong>Masalani tanlang</strong> yoki material, o’lcham va chegaralarni o’zingiz kiriting.</span></div>
       <div class="gstep"><b>2</b><span><strong>▶ Boshlash</strong> tugmasini bosing – harorat vaqt o’tishi bilan qanday o’zgarishini ko’rasiz.</span></div>

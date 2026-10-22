@@ -193,6 +193,7 @@
     }
     const every = Math.max(1, Math.ceil(p.K / (p.frames || p.K)));
     const frames = [Float32Array.from(u)], times = [0];
+    const probeVals = p.probe != null ? [u[p.probe]] : null; // har qadamdagi nuqta qiymati (ixtiyoriy)
     const s0 = new Float64Array(M), s1 = new Float64Array(M);
     const sxm = new Float64Array(M), sy0 = new Float64Array(M), sy1 = new Float64Array(M), fm = new Float64Array(M);
     const ustar = new Float64Array(M), next = new Float64Array(M), rhs = new Float64Array(M);
@@ -285,12 +286,13 @@
         }
       }
       u = Float64Array.from(next);
+      if (probeVals) probeVals.push(u[p.probe]);
       if (blow < 0) for (let m = 0; m < M; m++) if (!isFinite(u[m]) || Math.abs(u[m]) > 1e9) { blow = j + 1; break; }
       if ((j + 1) % every === 0 || j === p.K - 1) { frames.push(Float32Array.from(u)); times.push(t1); }
     }
     const tauMax = 1 / (2 * a2 * (1 / (hx * hx) + 1 / (hy * hy)) + beta);
     return {
-      X, Y, nx, ny, frames, times, hx, hy, tau, u,
+      X, Y, nx, ny, frames, times, hx, hy, tau, u, probeVals,
       Fo: a2 * tau * (1 / (hx * hx) + 1 / (hy * hy)), tauMax,
       iters: scheme === 'theta' && th > 0 ? iters / p.K : 0, blow
     };

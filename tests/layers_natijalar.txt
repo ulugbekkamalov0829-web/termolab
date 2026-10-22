@@ -1,0 +1,7 @@
+Devor (2 qatlam): q = 9.3713 W/m2, analitik 9.3713, farq 5.69e-14 %
+  nostatsionar 40 kundan keyin q = 9.3713 W/m2
+Quvur (po'lat + izolyatsiya): q = 28.7883 W/m, analitik 28.7883, farq 1.73e-13 %
+Shar markazi, t = 120 s: sonli 5.700 C, analitik 5.696 C
+Shar markazi, t = 300 s: sonli 29.207 C, analitik 29.227 C
+Shar markazi, t = 600 s: sonli 70.134 C, analitik 70.155 C
+Beton devor: q = 78.38 W/m2 (oldingi tekshiruvda 78.38)

@@ -5,6 +5,21 @@
 **Muallif:** Kamalov Ulugʻbek, ATT, Axborot tizimlari va texnologiyalari, 3-kurs.
 StudEXPO-2026 (UBS, Namangan), 1-seksiya: dasturlash va veb-ilovalar.
 
+## Amaliy masalalar (asosiy bo’lim)
+
+Real hayotdagi savolga javob beradigan beshta virtual laboratoriya ishi — kiritiladigan qiymatlar sohaning o’z tilida, natija 3D modelda:
+
+| Soha | Savol | Model |
+|---|---|---|
+| Qurilish | Devordan qancha issiqlik yo’qoladi, izolyatsiya qancha tejaydi, devor namlanmaydimi? | ko’p qatlamli tekis devor, 1D |
+| Energetika | Issiq suv quvuri qancha yo’qotadi, suv qancha soviydi? | silindrik qatlamlar, 1D |
+| Kundalik hayot | Tuxumni necha daqiqa qaynatish kerak? | shar, 1D |
+| Elektronika | Radiator protsessorni qizib ketishdan saqlaydimi? | plastinka + manba, 2D |
+| Metallurgiya | Payvand choki qanday soviydi (t₈/₅), qachon ushlash mumkin? | plastinka, 2D |
+
+Ko’p qatlamli va silindr/shar geometriyali masalalar `src/layers.js` dagi chekli hajmlar usuli bilan yechiladi
+(barqaror holatda qatlamli devor va quvur uchun aniq; tekshiruv: `tests/layers.test.js`). 3D ko’rinish `src/view3d.js` — tashqi kutubxonasiz, internetsiz ishlaydi.
+
 ## Masala
 
 Jismdagi harorat taqsimotini topish:
@@ -70,6 +85,9 @@ python/tekshiruv.py     yaqinlashish tartibi va darslik masalasi
 python/kitob_3_masala.py darslikdagi algoritmning aynan takrori (992 iteratsiya)
 tests/convergence.test.js  JS yadro testlari (yaqinlashish tartibi)
 tests/fizik_tekshiruv.test.js  analitik yechimlar bilan solishtirish
+tests/layers.test.js    ko’p qatlamli devor, quvur, shar: analitik yechimlar bilan
+src/layers.js           ko’p qatlamli, silindr va shar geometriya (chekli hajmlar)
+src/view3d.js, src/amaliy.js  3D ko’rinish va amaliy masalalar
 TAQDIMOT_NUTQI.md       taqdimot rejasi va hakamlar savollari
 tools/build.py          index.html ni yigʻish
 ```

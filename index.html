@@ -116,6 +116,45 @@ details.more fieldset{margin-bottom:10px;background:#fff}
 .bchead select{max-width:100%;width:100%}
 .summary li.hint{font-size:13.5px}
 
+/* Amaliy masalalar */
+.cats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media (max-width:900px){.cats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.scen{font:inherit;display:flex;align-items:center;gap:10px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;color:var(--ink);min-width:0}
+.scen:hover{border-color:var(--accent)}
+.scen[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent);background:var(--accent-soft)}
+.scen .ico{flex:none;width:44px;height:44px;border-radius:10px;background:#fdeee6;color:#b33a1c;display:grid;place-items:center}
+.scen small{display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.scen b{font-size:14.5px;font-weight:600;line-height:1.25}
+.grid.real{grid-template-columns:340px minmax(0,1fr)}
+@media (max-width:900px){.grid.real{grid-template-columns:minmax(0,1fr)}}
+.q{margin:0;font-size:16px;line-height:1.45}
+.dimbox{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;color:#334155;line-height:1.5}
+.dimtag{display:inline-block;background:var(--accent);color:#fff;border-radius:6px;padding:1px 8px;font-weight:600;font-size:12.5px;margin-right:4px}
+.amform{display:flex;flex-direction:column;gap:10px}
+.amform .rng label{display:flex;justify-content:space-between;gap:8px}
+.amform output{font-family:var(--mono);color:var(--accent);white-space:nowrap}
+.amform input[type=range]{width:100%;accent-color:var(--accent)}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.ans{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--soft);display:flex;flex-direction:column;gap:2px;min-width:0}
+.ans span{font-size:12.5px;color:var(--muted)}
+.ans b{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.15}
+.ans small{font-size:12.5px;color:var(--muted)}
+.ans em{font-style:normal;font-size:13px;font-weight:500}
+.ans.ok{background:#eaf6ef;border-color:#bfe0cd} .ans.ok em{color:#17603d}
+.ans.bad{background:#fbecec;border-color:#f0c2c5} .ans.bad em{color:#8f1d24}
+.ans.info{background:#fff7ea;border-color:#efd9b8} .ans.info em{color:#7a4d10}
+.viz3d{position:relative;border:1px solid var(--line);border-radius:12px;background:linear-gradient(#f7f9fc,#e9eef5)}
+#am-3d{height:min(56vw,420px)}
+.cb{position:absolute;right:12px;top:10px;display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;color:var(--muted);background:rgba(255,255,255,.85);padding:4px 8px;border-radius:8px}
+.cb i{display:inline-block;width:110px;height:10px;border-radius:3px;background:linear-gradient(90deg,#223a8c,#3080ce,#78c4d6,#f5e296,#f08c3c,#c4261f)}
+.explain{margin:0;font-size:14.5px;line-height:1.55;max-width:90ch}
+.dims{margin-top:16px}
+.dimgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:760px){.dimgrid{grid-template-columns:minmax(0,1fr)}}
+.dimgrid>div{border-top:3px solid var(--accent);padding-top:8px}
+.dimgrid p{margin:4px 0 0;font-size:14px;color:#334155;line-height:1.5}
+
 </style>
 </head>
 <body>
@@ -128,15 +167,58 @@ details.more fieldset{margin-bottom:10px;background:#fff}
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Bo’limlar">
-    <button role="tab" data-tab="lab" aria-selected="true">Laboratoriya</button>
+    <button role="tab" data-tab="real" aria-selected="true">Amaliy masalalar</button>
+    <button role="tab" data-tab="lab" aria-selected="false">Ilmiy laboratoriya</button>
     <button role="tab" data-tab="theory" aria-selected="false">Qanday ishlaydi</button>
     <button role="tab" data-tab="stab" aria-selected="false">Turg’unlik</button>
     <button role="tab" data-tab="conv" aria-selected="false">Aniqlik</button>
     <button role="tab" data-tab="rel" aria-selected="false">Ishonchlilik</button>
   </nav>
 
-  <!-- ===================== LABORATORIYA ===================== -->
-  <section class="panel" id="p-lab">
+  <!-- ===================== AMALIY MASALALAR ===================== -->
+  <section class="panel" id="p-real">
+    <div class="cats" id="am-cats" role="group" aria-label="Soha tanlash"></div>
+    <div class="grid real">
+      <aside class="card">
+        <h2 id="am-title"></h2>
+        <p class="q" id="am-q"></p>
+        <div class="dimbox" id="am-dim"></div>
+        <div class="label">Masala shartlari</div>
+        <div class="amform" id="am-form"></div>
+      </aside>
+      <section class="card" aria-label="Javob">
+        <div class="label">Javob</div>
+        <div class="answers" id="am-ans"></div>
+        <div class="viz3d">
+          <canvas id="am-3d" aria-label="Jismning 3D ko’rinishi, rang – harorat"></canvas>
+          <div class="cb" id="am-cb"></div>
+        </div>
+        <p class="hint center">3D modelni sichqoncha (yoki barmoq) bilan aylantiring, g’ildirak bilan yaqinlashtiring. Rang – harorat: ko’k – sovuq, qizil – issiq.</p>
+        <div class="timebar">
+          <button class="btn" id="am-play" type="button">▶ Boshlash</button>
+          <input type="range" id="am-time" min="0" value="0" aria-label="Vaqt">
+          <span class="tval" id="am-tval"></span>
+        </div>
+        <p class="explain" id="am-explain"></p>
+        <div class="two">
+          <div class="f"><h3 id="am-profT"></h3><canvas id="am-prof" style="height:230px"></canvas>
+            <div class="legend"><span><i style="background:#c4401f"></i>hozirgi payt</span><span><i style="background:#9aa7b5"></i>boshlanishi</span></div></div>
+          <div class="f"><h3 id="am-probeT"></h3><canvas id="am-probe" style="height:230px"></canvas></div>
+        </div>
+      </section>
+    </div>
+    <section class="card dims">
+      <h2>1D, 2D va 3D masala: farqi nimada?</h2>
+      <div class="dimgrid">
+        <div><b>1D – bir o’lchovli</b><p>Harorat faqat bitta yo’nalishda o’zgaradi. Masalan, devor: issiqlik xonadan ko’chaga qalinlik bo’ylab o’tadi; quvur va tuxumda – markazdan tashqariga radius bo’ylab. Hisob tez va juda aniq.</p></div>
+        <div><b>2D – ikki o’lchovli</b><p>Harorat tekislikda ikki yo’nalishda (x va y) o’zgaradi. Masalan, radiator plastinkasi yoki payvandlangan list: issiqlik bir nuqtadan har tomonga tarqaladi, qalinlik bo’yicha esa deyarli bir xil.</p></div>
+        <div><b>3D – uch o’lchovli</b><p>Harorat uchala yo’nalishda o’zgaradi – murakkab shakldagi detallar. Ko’p hollarda simmetriya yoki yupqalik tufayli masala 1D yoki 2D ga keltiriladi: natija deyarli bir xil, hisob esa yuzlab marta tez.</p></div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ===================== ILMIY LABORATORIYA ===================== -->
+  <section class="panel" id="p-lab" hidden>
     <div class="guide" id="guide">
       <div class="gstep"><b>1</b><span><strong>Masalani tanlang</strong> yoki material, o’lcham va chegaralarni o’zingiz kiriting.</span></div>
       <div class="gstep"><b>2</b><span><strong>▶ Boshlash</strong> tugmasini bosing – harorat vaqt o’tishi bilan qanday o’zgarishini ko’rasiz.</span></div>
@@ -524,6 +606,7 @@ details.more fieldset{margin-bottom:10px;background:#fff}
     }
     const every = Math.max(1, Math.ceil(p.K / (p.frames || p.K)));
     const frames = [Float32Array.from(u)], times = [0];
+    const probeVals = p.probe != null ? [u[p.probe]] : null; // har qadamdagi nuqta qiymati (ixtiyoriy)
     const s0 = new Float64Array(M), s1 = new Float64Array(M);
     const sxm = new Float64Array(M), sy0 = new Float64Array(M), sy1 = new Float64Array(M), fm = new Float64Array(M);
     const ustar = new Float64Array(M), next = new Float64Array(M), rhs = new Float64Array(M);
@@ -616,12 +699,13 @@ details.more fieldset{margin-bottom:10px;background:#fff}
         }
       }
       u = Float64Array.from(next);
+      if (probeVals) probeVals.push(u[p.probe]);
       if (blow < 0) for (let m = 0; m < M; m++) if (!isFinite(u[m]) || Math.abs(u[m]) > 1e9) { blow = j + 1; break; }
       if ((j + 1) % every === 0 || j === p.K - 1) { frames.push(Float32Array.from(u)); times.push(t1); }
     }
     const tauMax = 1 / (2 * a2 * (1 / (hx * hx) + 1 / (hy * hy)) + beta);
     return {
-      X, Y, nx, ny, frames, times, hx, hy, tau, u,
+      X, Y, nx, ny, frames, times, hx, hy, tau, u, probeVals,
       Fo: a2 * tau * (1 / (hx * hx) + 1 / (hy * hy)), tauMax,
       iters: scheme === 'theta' && th > 0 ? iters / p.K : 0, blow
     };
@@ -666,6 +750,310 @@ details.more fieldset{margin-bottom:10px;background:#fff}
 
   root.TL = { thomas, seidel3, op1D, solve1D, solve2D, mms1D, mms2D };
   if (typeof module !== 'undefined') module.exports = root.TL;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/*
+ * TermoLab: ko'p qatlamli jismlar uchun chekli hajmlar usuli
+ * ---------------------------------------------------------------
+ *   rho*c * du/dt = (1/r^m) d/dr ( r^m * lambda * du/dr ) + Q
+ *   m = 0 - tekis devor, m = 1 - silindr (quvur, sim), m = 2 - shar (tuxum, sharcha)
+ *
+ * Har bir qatlam o'z lambda, rho, c ga ega. Qatlamlar chegarasida issiqlik
+ * oqimining uzluksizligi avtomatik saqlanadi (konservativ sxema).
+ * Hujayra o'tkazuvchanligi barqaror holatdagi aniq formuladan olinadi:
+ *   tekis:   G = lambda / h
+ *   silindr: G = lambda / ln(r2/r1)
+ *   shar:    G = lambda / (1/r1 - 1/r2)
+ * shuning uchun barqaror holatda qatlamli devor/quvur/shar uchun natija aniq.
+ * Vaqt bo'yicha theta-sxema (Rannacher boshlanishi bilan), haydash usuli.
+ */
+(function (root) {
+  'use strict';
+  const TL = root.TL || {};
+
+  function mesh(p) {
+    const m = p.geom || 0, x = [p.r0 || 0], cells = [];
+    for (const L of p.layers) {
+      const n = Math.max(1, L.n || 10), h = L.d / n;
+      for (let k = 0; k < n; k++) { cells.push({ h, lam: L.lam, rc: L.rho * L.c, Q: L.Q || 0 }); x.push(x[x.length - 1] + h); }
+    }
+    const N = x.length, A = r => (m === 0 ? 1 : Math.pow(r, m));
+    const V = (a, b) => (m === 0 ? b - a : (Math.pow(b, m + 1) - Math.pow(a, m + 1)) / (m + 1));
+    const G = cells.map((c, j) => {
+      const r1 = x[j], r2 = x[j + 1];
+      if (m === 0) return c.lam / c.h;
+      if (r1 <= 0) return c.lam * A((r1 + r2) / 2) / c.h;
+      return m === 1 ? c.lam / Math.log(r2 / r1) : c.lam / (1 / r1 - 1 / r2);
+    });
+    const C = new Float64Array(N), S = new Float64Array(N); // issiqlik sig'imi va manba
+    for (let i = 0; i < N; i++) {
+      if (i > 0) { const c = cells[i - 1], v = V(x[i] - c.h / 2, x[i]); C[i] += c.rc * v; S[i] += c.Q * v; }
+      if (i < N - 1) { const c = cells[i], v = V(x[i], x[i] + c.h / 2); C[i] += c.rc * v; S[i] += c.Q * v; }
+    }
+    return { m, x, cells, G, C, S, N, A };
+  }
+
+  const val = (v, t) => (typeof v === 'function' ? v(t) : (v || 0));
+
+  // L matritsa (uch diagonal) va erkin had b(t)
+  function system(M, bcIn, bcOut) {
+    const { N, G, A, x } = M;
+    const lo = new Float64Array(N), di = new Float64Array(N), up = new Float64Array(N);
+    for (let i = 0; i < N; i++) {
+      if (i > 0) { lo[i] = -G[i - 1]; di[i] += G[i - 1]; }
+      if (i < N - 1) { up[i] = -G[i]; di[i] += G[i]; }
+    }
+    const a0 = A(x[0]), aN = A(x[N - 1]);
+    if (bcIn.type === 3) di[0] += a0 * bcIn.alpha;
+    if (bcOut.type === 3) di[N - 1] += aN * bcOut.alpha;
+    const b = (t, out) => {
+      out.set(M.S);
+      if (bcIn.type !== 1) out[0] += a0 * ((bcIn.type === 3 ? bcIn.alpha * val(bcIn.ue, t) : 0) + val(bcIn.q, t));
+      if (bcOut.type !== 1) out[N - 1] += aN * ((bcOut.type === 3 ? bcOut.alpha * val(bcOut.ue, t) : 0) + val(bcOut.q, t));
+      return out;
+    };
+    return { lo, di, up, b };
+  }
+
+  // p = {geom, r0, layers:[{d,lam,rho,c,n,Q}], inner, outer, init(x)|T0, T, K, theta, frames}
+  function solveLayered(p) {
+    const M = mesh(p), N = M.N, sys = system(M, p.inner, p.outer), tau = p.T / p.K, th = p.theta ?? 0.5;
+    const init = p.init || (() => p.T0 || 0);
+    let u = new Float64Array(N); for (let i = 0; i < N; i++) u[i] = init(M.x[i]);
+    if (p.inner.type === 1) u[0] = val(p.inner.g, 0);
+    if (p.outer.type === 1) u[N - 1] = val(p.outer.g, 0);
+    const every = Math.max(1, Math.ceil(p.K / (p.frames || 200)));
+    const frames = [Float64Array.from(u)], times = [0];
+    const b0 = new Float64Array(N), b1 = new Float64Array(N), rhs = new Float64Array(N), nx = new Float64Array(N);
+    const lo = new Float64Array(N), di = new Float64Array(N), up = new Float64Array(N);
+    const start = th === 0.5 ? 2 : 0;
+    for (let j = 0; j < p.K; j++) {
+      const t0 = j * tau, t1 = t0 + tau, tj = j < start ? 1 : th;
+      sys.b(t0, b0); sys.b(t1, b1);
+      for (let i = 0; i < N; i++) {
+        const dir = (i === 0 && p.inner.type === 1) || (i === N - 1 && p.outer.type === 1);
+        if (dir) { lo[i] = 0; di[i] = 1; up[i] = 0; rhs[i] = val(i === 0 ? p.inner.g : p.outer.g, t1); continue; }
+        lo[i] = tj * tau * sys.lo[i]; di[i] = M.C[i] + tj * tau * sys.di[i]; up[i] = tj * tau * sys.up[i];
+        const Lu = sys.di[i] * u[i] + (i > 0 ? sys.lo[i] * u[i - 1] : 0) + (i < N - 1 ? sys.up[i] * u[i + 1] : 0);
+        rhs[i] = M.C[i] * u[i] - (1 - tj) * tau * Lu + tau * (tj * b1[i] + (1 - tj) * b0[i]);
+      }
+      TL.thomas(lo, di, up, rhs, nx); u = Float64Array.from(nx);
+      if ((j + 1) % every === 0 || j === p.K - 1) { frames.push(Float64Array.from(u)); times.push(t1); }
+    }
+    return { x: M.x, mesh: M, frames, times, u, tau };
+  }
+
+  // Barqaror holat: L u = b
+  function steadyLayered(p, t = 0) {
+    const M = mesh(p), N = M.N, sys = system(M, p.inner, p.outer), b = sys.b(t, new Float64Array(N));
+    const lo = Float64Array.from(sys.lo), di = Float64Array.from(sys.di), up = Float64Array.from(sys.up), rhs = Float64Array.from(b);
+    if (p.inner.type === 1) { lo[0] = 0; di[0] = 1; up[0] = 0; rhs[0] = val(p.inner.g, t); }
+    if (p.outer.type === 1) { lo[N - 1] = 0; di[N - 1] = 1; up[N - 1] = 0; rhs[N - 1] = val(p.outer.g, t); }
+    const u = TL.thomas(lo, di, up, rhs, new Float64Array(N));
+    return { x: M.x, mesh: M, u };
+  }
+
+  // Tashqi sirt orqali chiqayotgan issiqlik: tekis - W/m², silindr - W/m (uzunlik), shar - W (to'liq)
+  function outerFlux(M, u, outer, t = 0) {
+    const N = M.N, geomFactor = M.m === 0 ? 1 : M.m === 1 ? 2 * Math.PI : 4 * Math.PI;
+    let q;
+    if (outer.type === 3) q = M.A(M.x[N - 1]) * outer.alpha * (u[N - 1] - val(outer.ue, t));
+    else q = M.G[N - 2] * (u[N - 2] - u[N - 1]); // oxirgi hujayra orqali oqim
+    return q * geomFactor;
+  }
+  function innerFlux(M, u) { // ichki sirtdan kirayotgan oqim (birinchi hujayra orqali)
+    const geomFactor = M.m === 0 ? 1 : M.m === 1 ? 2 * Math.PI : 4 * Math.PI;
+    return M.G[0] * (u[0] - u[1]) * geomFactor;
+  }
+
+  TL.solveLayered = solveLayered; TL.steadyLayered = steadyLayered; TL.outerFlux = outerFlux; TL.innerFlux = innerFlux; TL.layerMesh = mesh;
+  root.TL = TL;
+  if (typeof module !== 'undefined') module.exports = TL;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/*
+ * TermoLab 3D: kutubxonasiz kichik 3D chizgich (Canvas 2D).
+ * Yuzalar chuqurlik bo'yicha saralanadi (painter's algorithm), Lambert yoritish,
+ * sichqoncha/barmoq bilan aylantirish, g'ildirak bilan yaqinlashtirish.
+ */
+(function (root) {
+  'use strict';
+  function View3D(canvas) {
+    this.cv = canvas; this.faces = []; this.labels = []; this.yaw = -0.6; this.pitch = 0.42; this.zoom = 1;
+    this.onchange = null;
+    let drag = null;
+    canvas.style.touchAction = 'none'; canvas.style.cursor = 'grab';
+    canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: this.yaw, pitch: this.pitch }; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+    canvas.addEventListener('pointermove', e => {
+      if (!drag) return;
+      this.yaw = drag.yaw + (e.clientX - drag.x) * 0.01;
+      this.pitch = Math.max(-1.4, Math.min(1.4, drag.pitch + (e.clientY - drag.y) * 0.01));
+      this.draw();
+    });
+    const end = () => { drag = null; canvas.style.cursor = 'grab'; };
+    canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+    canvas.addEventListener('wheel', e => { e.preventDefault(); this.zoom = Math.max(0.5, Math.min(2.5, this.zoom * (e.deltaY > 0 ? 0.92 : 1.08))); this.draw(); }, { passive: false });
+  }
+  View3D.prototype.set = function (faces, labels) { this.faces = faces; this.labels = labels || []; this.draw(); };
+  View3D.prototype.draw = function () {
+    const cv = this.cv, r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    if (!r.width) return;
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, r.width, r.height);
+    const cy = Math.cos(this.yaw), sy = Math.sin(this.yaw), cp = Math.cos(this.pitch), sp = Math.sin(this.pitch);
+    const rot = p => { const x = p[0] * cy - p[2] * sy, z0 = p[0] * sy + p[2] * cy; return [x, p[1] * cp - z0 * sp, p[1] * sp + z0 * cp]; };
+    const f = Math.min(r.width, r.height) * 1.35 * this.zoom, D = 4.6;
+    const proj = q => { const s = f / (D - q[2]); return [r.width / 2 + q[0] * s, r.height / 2 - q[1] * s, q[2]]; };
+    const L = [0.35, 0.75, 0.55], ln = Math.hypot(...L); L[0] /= ln; L[1] /= ln; L[2] /= ln;
+    const list = [];
+    for (const fc of this.faces) {
+      const q = fc.p.map(rot);
+      const a = [q[1][0] - q[0][0], q[1][1] - q[0][1], q[1][2] - q[0][2]], b = [q[2][0] - q[0][0], q[2][1] - q[0][1], q[2][2] - q[0][2]];
+      let n = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; const nl = Math.hypot(...n) || 1; n = n.map(v => v / nl);
+      if (n[2] < 0) n = n.map(v => -v); // kameraga qaragan tomon
+      const lit = 0.58 + 0.42 * Math.max(0, n[0] * L[0] + n[1] * L[1] + n[2] * L[2]);
+      let z = 0; for (const v of q) z += v[2]; z /= q.length;
+      list.push({ s: q.map(proj), z: z - (fc.bias || 0), col: fc.c, lit: fc.flat ? 1 : lit, edge: fc.edge });
+    }
+    list.sort((A, B) => A.z - B.z); // uzoqdagilar avval
+    for (const it of list) {
+      const [R, G, Bc] = it.col, k = it.lit;
+      const fill = `rgb(${Math.round(R * k)},${Math.round(G * k)},${Math.round(Bc * k)})`;
+      c.beginPath(); c.moveTo(it.s[0][0], it.s[0][1]);
+      for (let i = 1; i < it.s.length; i++) c.lineTo(it.s[i][0], it.s[i][1]);
+      c.closePath(); c.fillStyle = fill; c.fill();
+      c.strokeStyle = it.edge || fill; c.lineWidth = it.edge ? 1.2 : 0.6; c.stroke();
+    }
+    c.font = '600 13px "IBM Plex Sans", system-ui, sans-serif'; c.textAlign = 'center';
+    for (const lb of this.labels) {
+      const s = proj(rot(lb.p)); const w = c.measureText(lb.t).width + 12;
+      c.fillStyle = 'rgba(255,255,255,0.88)'; c.strokeStyle = 'rgba(21,32,44,0.25)';
+      c.beginPath(); c.roundRect(s[0] - w / 2, s[1] - 11, w, 22, 6); c.fill(); c.stroke();
+      c.fillStyle = '#15202c'; c.fillText(lb.t, s[0], s[1] + 4);
+    }
+  };
+
+  // ---------- Modellar ----------
+  // Yordamchi: to'rtburchak yuza
+  const Q = (a, b, cc, d, col, extra) => Object.assign({ p: [a, b, cc, d], c: col }, extra || {});
+
+  // Tekis devor: qalinlik x bo'yicha, eni z, balandligi y. xs - tugunlar (m), us - harorat, colorOf(u)
+  function wall(xs, us, colorOf, layerEdges, labels) {
+    const T = xs[xs.length - 1], sx = 0.9 / Math.max(T, 0.05), W = 1.8, H = 1.2, faces = [];
+    const X = v => (v * sx) - T * sx / 2;
+    for (let i = 0; i < xs.length - 1; i++) {
+      const col = colorOf((us[i] + us[i + 1]) / 2), x0 = X(xs[i]), x1 = X(xs[i + 1]);
+      faces.push(Q([x0, -H / 2, W / 2], [x1, -H / 2, W / 2], [x1, H / 2, W / 2], [x0, H / 2, W / 2], col));   // old kesim
+      faces.push(Q([x0, H / 2, W / 2], [x1, H / 2, W / 2], [x1, H / 2, -W / 2], [x0, H / 2, -W / 2], col));   // ust
+    }
+    faces.push(Q([X(0), -H / 2, W / 2], [X(0), H / 2, W / 2], [X(0), H / 2, -W / 2], [X(0), -H / 2, -W / 2], colorOf(us[0])));
+    faces.push(Q([X(T), -H / 2, W / 2], [X(T), H / 2, W / 2], [X(T), H / 2, -W / 2], [X(T), -H / 2, -W / 2], colorOf(us[us.length - 1])));
+    for (const e of layerEdges || []) {
+      const x = X(e), d = 0.004;
+      faces.push(Q([x - d, -H / 2, W / 2 + 0.001], [x + d, -H / 2, W / 2 + 0.001], [x + d, H / 2, W / 2 + 0.001], [x - d, H / 2, W / 2 + 0.001], [40, 50, 60], { flat: true, bias: -0.01 }));
+    }
+    return { faces, labels: (labels || []).map(l => ({ p: [X(l.x), l.y ?? 0.75, l.z ?? 0], t: l.t })) };
+  }
+
+  // Quvur: ichki radius r0, tugunlar rs, harorat us. 3/4 qismi ko'rsatiladi (kesilgan).
+  function pipe(rs, us, colorOf, waterColor, labels) {
+    const R = rs[rs.length - 1], s = 0.62 / R, Lz = 1.6, faces = [], a0 = 0, a1 = 1.5 * Math.PI, na = 36;
+    const P = (r, a, z) => [r * s * Math.cos(a), r * s * Math.sin(a), z];
+    for (let k = 0; k < na; k++) {
+      const t0 = a0 + (a1 - a0) * k / na, t1 = a0 + (a1 - a0) * (k + 1) / na;
+      faces.push(Q(P(R, t0, -Lz / 2), P(R, t1, -Lz / 2), P(R, t1, Lz / 2), P(R, t0, Lz / 2), colorOf(us[us.length - 1])));     // tashqi sirt
+      faces.push(Q(P(rs[0], t0, -Lz / 2), P(rs[0], t1, -Lz / 2), P(rs[0], t1, Lz / 2), P(rs[0], t0, Lz / 2), waterColor));   // ichki (suv)
+      for (let i = 0; i < rs.length - 1; i++) {   // old kesim (halqalar)
+        const col = colorOf((us[i] + us[i + 1]) / 2);
+        faces.push(Q(P(rs[i], t0, Lz / 2), P(rs[i + 1], t0, Lz / 2), P(rs[i + 1], t1, Lz / 2), P(rs[i], t1, Lz / 2), col, { bias: -0.002 }));
+      }
+    }
+    for (const ang of [a0, a1]) for (let i = 0; i < rs.length - 1; i++) {   // uzunasiga kesim
+      const col = colorOf((us[i] + us[i + 1]) / 2);
+      faces.push(Q(P(rs[i], ang, -Lz / 2), P(rs[i + 1], ang, -Lz / 2), P(rs[i + 1], ang, Lz / 2), P(rs[i], ang, Lz / 2), col));
+    }
+    // suv yuzasi (old tomonda doira)
+    for (let k = 0; k < 24; k++) {
+      const t0 = 2 * Math.PI * k / 24, t1 = 2 * Math.PI * (k + 1) / 24;
+      faces.push({ p: [P(0, 0, Lz / 2 - 0.02), P(rs[0], t0, Lz / 2 - 0.02), P(rs[0], t1, Lz / 2 - 0.02)], c: waterColor });
+    }
+    return { faces, labels: (labels || []).map(l => ({ p: l.p, t: l.t })) };
+  }
+
+  // Tuxum (shar modeli, tuxum shaklida ko'rsatiladi): yarmi kesilgan
+  function egg(rs, us, colorOf, labels) {
+    const R = rs[rs.length - 1], s = 0.85 / R, faces = [], ky = 1.28;
+    const shape = (r, th, ph) => { // th: qutb burchagi, ph: azimut; tuxum shakli - pastga qarab biroz yo'g'onroq
+      const taper = 1 - 0.12 * Math.cos(th);
+      return [r * s * Math.sin(th) * Math.cos(ph) * taper, r * s * ky * Math.cos(th), r * s * Math.sin(th) * Math.sin(ph) * taper];
+    };
+    const nt = 22, np = 26;
+    for (let a = 0; a < nt; a++) for (let b = 0; b < np; b++) {   // orqa yarim (ph: pi..2pi)
+      const t0 = Math.PI * a / nt, t1 = Math.PI * (a + 1) / nt, p0 = Math.PI + Math.PI * b / np, p1 = Math.PI + Math.PI * (b + 1) / np;
+      faces.push(Q(shape(R, t0, p0), shape(R, t0, p1), shape(R, t1, p1), shape(R, t1, p0), colorOf(us[us.length - 1])));
+    }
+    for (let i = 0; i < rs.length - 1; i++) {   // kesim yuzasi: halqalar (z = 0 tekislik)
+      const col = colorOf((us[i] + us[i + 1]) / 2);
+      for (let a = 0; a < 2 * nt; a++) {
+        const t0 = 2 * Math.PI * a / (2 * nt), t1 = 2 * Math.PI * (a + 1) / (2 * nt);
+        const pt = (r, t) => { const v = shape(r, Math.abs(t <= Math.PI ? t : 2 * Math.PI - t), t <= Math.PI ? 0 : Math.PI); return [v[0], v[1], 0.001]; };
+        faces.push(Q(pt(rs[i], t0), pt(rs[i + 1], t0), pt(rs[i + 1], t1), pt(rs[i], t1), col, { bias: -0.003 }));
+      }
+    }
+    return { faces, labels: labels || [] };
+  }
+
+  // Plastinka (2D maydon) - ustki yuzasi rangli, ixtiyoriy qovurg'alar va chip
+  function plate(U, nx, ny, Lx, Ly, colorOf, opt) {
+    opt = opt || {};
+    const sc = 2.0 / Math.max(Lx, Ly), W = Lx * sc, Dp = Ly * sc, th = Math.max(0.04, (opt.thick || 0.004) * sc * 3), faces = [];
+    const step = Math.max(1, Math.ceil(Math.max(nx, ny) / 36));
+    const at = (i, k) => U[Math.min(ny - 1, k) * nx + Math.min(nx - 1, i)];
+    const X = i => -W / 2 + W * i / (nx - 1), Z = k => Dp / 2 - Dp * k / (ny - 1);
+    for (let k = 0; k < ny - 1; k += step) for (let i = 0; i < nx - 1; i += step) {
+      const i1 = Math.min(nx - 1, i + step), k1 = Math.min(ny - 1, k + step);
+      const col = colorOf((at(i, k) + at(i1, k) + at(i1, k1) + at(i, k1)) / 4);
+      faces.push(Q([X(i), 0, Z(k)], [X(i1), 0, Z(k)], [X(i1), 0, Z(k1)], [X(i), 0, Z(k1)], col));
+    }
+    for (let i = 0; i < nx - 1; i += step) { // old va orqa qirralar
+      const i1 = Math.min(nx - 1, i + step);
+      faces.push(Q([X(i), 0, Z(0)], [X(i1), 0, Z(0)], [X(i1), -th, Z(0)], [X(i), -th, Z(0)], colorOf(at(i, 0))));
+      faces.push(Q([X(i), 0, Z(ny - 1)], [X(i1), 0, Z(ny - 1)], [X(i1), -th, Z(ny - 1)], [X(i), -th, Z(ny - 1)], colorOf(at(i, ny - 1))));
+    }
+    for (let k = 0; k < ny - 1; k += step) {
+      const k1 = Math.min(ny - 1, k + step);
+      faces.push(Q([X(0), 0, Z(k)], [X(0), 0, Z(k1)], [X(0), -th, Z(k1)], [X(0), -th, Z(k)], colorOf(at(0, k))));
+      faces.push(Q([X(nx - 1), 0, Z(k)], [X(nx - 1), 0, Z(k1)], [X(nx - 1), -th, Z(k1)], [X(nx - 1), -th, Z(k)], colorOf(at(nx - 1, k))));
+    }
+    if (opt.fins) { // radiator qovurg'alari (pastga)
+      const nf = 9, fh = 0.45;
+      for (let f = 0; f < nf; f++) {
+        const zf = -Dp / 2 + Dp * (f + 0.5) / nf, kf = Math.round((Dp / 2 - zf) / Dp * (ny - 1));
+        for (let i = 0; i < nx - 1; i += step) {
+          const i1 = Math.min(nx - 1, i + step), u = (at(i, kf) + at(i1, kf)) / 2, col = colorOf(u);
+          faces.push(Q([X(i), -th, zf], [X(i1), -th, zf], [X(i1), -th - fh, zf], [X(i), -th - fh, zf], col.map(v => v * 0.92)));
+        }
+      }
+    }
+    if (opt.chip) { // protsessor (qora blok)
+      const cw = opt.chip * sc, ch = 0.06, g = [55, 60, 70];
+      const a = -cw / 2, b = cw / 2;
+      faces.push(Q([a, ch, a], [b, ch, a], [b, ch, b], [a, ch, b], g));
+      faces.push(Q([a, 0, b], [b, 0, b], [b, ch, b], [a, ch, b], g)); faces.push(Q([a, 0, a], [b, 0, a], [b, ch, a], [a, ch, a], g));
+      faces.push(Q([a, 0, a], [a, 0, b], [a, ch, b], [a, ch, a], g)); faces.push(Q([b, 0, a], [b, 0, b], [b, ch, b], [b, ch, a], g));
+    }
+    if (opt.seam) { // payvand choki chizig'i
+      faces.push(Q([-0.01, 0.003, Dp / 2], [0.01, 0.003, Dp / 2], [0.01, 0.003, -Dp / 2], [-0.01, 0.003, -Dp / 2], [90, 90, 95], { flat: true, bias: -0.01 }));
+    }
+    return { faces, labels: opt.labels || [] };
+  }
+
+  root.View3D = View3D;
+  root.Models3D = { wall, pipe, egg, plate };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -1149,7 +1537,7 @@ function bind() {
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
     document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
     document.querySelectorAll('.panel').forEach(p => p.hidden = p.id !== 'p-' + b.dataset.tab);
-    if (b.dataset.tab === 'lab') drawAll(); if (b.dataset.tab === 'stab') drawG(); if (b.dataset.tab === 'conv' && !cvDone) runConv(); if (b.dataset.tab === 'rel' && !relDone) reliability();
+    if (b.dataset.tab === 'lab') drawAll(); if (b.dataset.tab === 'real' && window.TermoAmaliy) TermoAmaliy.redraw(); if (b.dataset.tab === 'stab') drawG(); if (b.dataset.tab === 'conv' && !cvDone) runConv(); if (b.dataset.tab === 'rel' && !relDone) reliability();
   }));
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { drawAll(); drawG(); if (cvLast) plotConv(cvLast); }, 100); });
 }
@@ -1342,5 +1730,377 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll);
 })();
 
 </script>
+<script>
+/* TermoLab — Amaliy masalalar: real hayotdagi savollarga javob beradigan virtual laboratoriya */
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const STOPS = [[34, 58, 140], [48, 128, 206], [120, 196, 214], [245, 226, 150], [240, 140, 60], [196, 38, 31]];
+function rgb(t) {
+  t = Math.max(0, Math.min(1, t)) * (STOPS.length - 1);
+  const i = Math.min(STOPS.length - 2, Math.floor(t)), f = t - i, a = STOPS[i], b = STOPS[i + 1];
+  return [0, 1, 2].map(k => Math.round(a[k] + (b[k] - a[k]) * f));
+}
+const n1 = v => (Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2));
+const C = v => n1(v) + ' °C';
+const fmtNum = v => v.toLocaleString('uz-UZ', { maximumFractionDigits: v < 10 ? 2 : v < 100 ? 1 : 0 }).replace(/ /g, ' ');
+function fmtTime(s) {
+  if (s < 90) return Math.round(s) + ' soniya';
+  if (s < 5400) return (s / 60).toFixed(s < 600 ? 1 : 0) + ' daqiqa';
+  if (s < 3 * 86400) return (s / 3600).toFixed(1) + ' soat';
+  return (s / 86400).toFixed(1) + ' kun';
+}
+function axisTime(s, T) { return T < 5400 ? (s / 60).toFixed(0) + ' min' : T < 3 * 86400 ? (s / 3600).toFixed(0) + ' soat' : (s / 86400).toFixed(1) + ' kun'; }
+// Shudring nuqtasi (Magnus formulasi)
+const dewPoint = (T, RH) => { const a = 17.62, b = 243.12, g = Math.log(RH / 100) + a * T / (b + T); return b * g / (a - g); };
+// Vaqt qatoridan qiymatga birinchi yetish payti (chiziqli interpolyatsiya)
+function crossTime(ts, ys, level, rising) {
+  for (let j = 1; j < ys.length; j++) {
+    const a = ys[j - 1], b = ys[j];
+    if (rising ? (a < level && b >= level) : (a > level && b <= level)) return ts[j - 1] + (level - a) / (b - a) * (ts[j] - ts[j - 1]);
+  }
+  return null;
+}
+
+// ======================= SCENARIYLAR =======================
+const WALL_MATS = { gisht: ['G’isht', 0.7, 1800, 880], beton: ['Beton', 1.4, 2300, 880], gazoblok: ['Gazoblok', 0.14, 500, 1000], paxsa: ['Paxsa (loy-somon)', 0.4, 1500, 1000], yogoch: ['Yog’och', 0.12, 510, 1380] };
+const INSUL = { none: ['Yo’q', 0, 1, 1], penoplast: ['Penoplast', 0.038, 25, 1450], paxta: ['Mineral paxta', 0.04, 100, 840], ppu: ['Penopoliuretan', 0.03, 60, 1500] };
+
+const SCEN = [
+{
+  id: 'devor', cat: 'Qurilish', icon: 'house', title: 'Uy devori qishda',
+  q: 'Devoringizdan qancha issiqlik yo’qoladi, izolyatsiya qancha tejaydi va devor namlanmaydimi?',
+  dim: '1D', why: 'Devorning eni va balandligi (metrlar) uning qalinligidan (santimetrlar) ancha katta. Shuning uchun issiqlik deyarli faqat bitta yo’nalishda – xonadan ko’chaga, qalinlik bo’ylab oqadi. Bu <b>bir o’lchovli (1D)</b> masala.',
+  fields: [
+    { id: 'mat', label: 'Devor materiali', type: 'select', opts: Object.entries(WALL_MATS).map(([k, v]) => [k, v[0]]), def: 'gisht' },
+    { id: 'd', label: 'Devor qalinligi', type: 'range', min: 10, max: 80, step: 1, unit: 'sm', def: 38 },
+    { id: 'ins', label: 'Issiqlik izolyatsiyasi (tashqi tomondan)', type: 'select', opts: Object.entries(INSUL).map(([k, v]) => [k, v[0]]), def: 'none' },
+    { id: 'di', label: 'Izolyatsiya qalinligi', type: 'range', min: 0, max: 20, step: 1, unit: 'sm', def: 5 },
+    { id: 'Ti', label: 'Xona harorati', type: 'range', min: 14, max: 26, step: 1, unit: '°C', def: 20 },
+    { id: 'To', label: 'Ko’cha harorati (sovuq kun)', type: 'range', min: -25, max: 10, step: 1, unit: '°C', def: -10 },
+    { id: 'RH', label: 'Xona havosi namligi', type: 'range', min: 30, max: 80, step: 5, unit: '%', def: 55 },
+    { id: 'A', label: 'Tashqi devorlar yuzasi', type: 'range', min: 10, max: 200, step: 5, unit: 'm²', def: 60 },
+    { id: 'price', label: '1 kWh issiqlik narxi (o’zingiz kiriting)', type: 'number', unit: 'so’m', def: 1000 },
+    { id: 'daynight', label: 'Kun-tun harorat o’zgarishi (±6 °C)', type: 'check', def: true }
+  ],
+  run(v) {
+    const m = WALL_MATS[v.mat], ins = INSUL[v.ins], hasIns = v.ins !== 'none' && v.di > 0;
+    const layers = [{ d: v.d / 100, lam: m[1], rho: m[2], c: m[3], n: 40, name: m[0] }];
+    if (hasIns) layers.push({ d: v.di / 100, lam: ins[1], rho: ins[2], c: ins[3], n: 20, name: ins[0] });
+    const ai = 8.7, ao = 23, day = 86400;
+    const ue = v.daynight ? t => v.To + 6 * Math.sin(2 * Math.PI * (t / day - 0.375)) : v.To;
+    const base = { geom: 0, layers, inner: { type: 3, alpha: ai, ue: v.Ti }, outer: { type: 3, alpha: ao, ue: v.To } };
+    const st = TL.steadyLayered(base), q = TL.outerFlux(st.mesh, st.u, base.outer);
+    const R = 1 / ai + layers.reduce((s, L) => s + L.d / L.lam, 0) + 1 / ao, U = 1 / R;
+    // izolyatsiyasiz taqqoslash
+    const st0 = TL.steadyLayered({ geom: 0, layers: [layers[0]], inner: base.inner, outer: base.outer });
+    const q0 = TL.outerFlux(st0.mesh, st0.u, base.outer);
+    const Tsurf = st.u[0], dew = dewPoint(v.Ti, v.RH);
+    // isitish mavsumi: 150 kun, o'rtacha tashqi harorat +3 °C
+    const season = U * (v.Ti - 3) * v.A * 150 * 24 / 1000;
+    // nostatsionar: devor 5 °C dan, isitish yoqildi, 4 kun
+    const sim = TL.solveLayered(Object.assign({}, base, { outer: { type: 3, alpha: ao, ue }, T0: 5, T: 4 * day, K: 960, theta: 0.5, frames: 240 }));
+    const ins0 = sim.frames.map(f => f[0]);
+    const tWarm = crossTime(sim.times, ins0, Tsurf - 0.5, true);
+    const edges = []; let acc = 0; for (const L of layers) { acc += L.d; edges.push(acc); } edges.pop();
+    return {
+      sim, x: sim.x, unitX: 'qalinlik, sm', xScale: 100, edges, range: [Math.min(v.To - 6, 5), v.Ti],
+      answers: [
+        { label: 'Issiqlik yo’qotish (eng sovuq kunda)', value: `${fmtNum(q * v.A / 1000)} kW`, note: `har 1 m² dan ${fmtNum(q)} W` },
+        { label: 'Devorning issiqlik o’tkazish koeffitsienti U', value: `${U.toFixed(2)} W/(m²·K)`, note: `issiqlik qarshiligi R = ${R.toFixed(2)} m²·K/W`, verdict: R >= 2.5 ? 'ok' : R >= 1.5 ? 'info' : 'bad', vtext: R >= 2.5 ? 'yaxshi issiqlik saqlaydi' : R >= 1.5 ? 'o’rtacha' : 'issiqlikni yomon saqlaydi' },
+        { label: 'Devorning ichki yuzasi harorati', value: C(Tsurf), note: `shudring nuqtasi ${C(dew)}`, verdict: Tsurf > dew + 3 ? 'ok' : Tsurf > dew ? 'info' : 'bad', vtext: Tsurf > dew + 3 ? 'namlanish va mog’or xavfi yo’q' : Tsurf > dew ? 'chegarada – burchaklarda mog’or bo’lishi mumkin' : 'devor terlaydi, mog’or xavfi bor' },
+        { label: 'Isitish mavsumida devor orqali yo’qotish', value: `${fmtNum(season)} kWh`, note: `≈ ${fmtNum(season * v.price)} so’m (150 kun, o’rtacha +3 °C)` },
+        hasIns ? { label: 'Izolyatsiya foydasi', value: `${Math.round((1 - q / q0) * 100)} % kam`, note: `izolyatsiyasiz ${fmtNum(q0)} W/m² bo’lardi`, verdict: 'ok', vtext: `mavsumda ≈ ${fmtNum(season * (q0 / q - 1))} kWh tejaladi` }
+               : { label: 'Agar 5 sm penoplast qo’shilsa', value: '', calc: true },
+        { label: 'Isitish yoqilgach devor isib bo’lishi', value: tWarm ? fmtTime(tWarm) : '4 kundan ko’p', note: 'ichki yuza barqaror haroratga yetguncha' }
+      ],
+      explain: `Issiqlik xonadan (${v.Ti} °C) ko’chaga (${v.To} °C) devor orqali oqadi. Har bir qatlam oqimga qarshilik ko’rsatadi: qatlam qanchalik qalin va material qanchalik “issiq” bo’lsa (λ kichik), qarshilik shuncha katta. Grafikdagi harorat chizig’i izolyatsiya qatlamida keskin pasayadi – issiqlikni asosan u ushlab qoladi.`,
+      model: (u, col) => Models3D.wall(sim.x, u, col, edges, [
+        { x: -0.35 * (sim.x[sim.x.length - 1]), y: 0.2, t: `Xona ${v.Ti} °C` },
+        { x: sim.x[sim.x.length - 1] * 1.35, y: 0.2, t: `Ko’cha ${v.To} °C` }].map(l => ({ x: l.x, y: l.y, t: l.t, z: 0.95 }))),
+      probeLabel: 'Devorning ichki yuzasi', probeIdx: 0
+    };
+  },
+  fixup(r, v) { // "agar penoplast qo'shilsa" hisobini aniq qilish
+    if (v.ins !== 'none' && v.di > 0) return;
+    const m = WALL_MATS[v.mat];
+    const R0 = 1 / 8.7 + v.d / 100 / m[1] + 1 / 23, R1 = R0 + 0.05 / 0.038;
+    const a = r.answers.find(x => x.calc); a.value = `${Math.round((1 - R0 / R1) * 100)} % kam`; a.note = 'yo’qotish shuncha kamayadi (hisob)'; a.verdict = 'info'; a.vtext = `mavsumda ≈ ${fmtNum((1 - R0 / R1) * (v.Ti - 3) / R0 * v.A * 150 * 24 / 1000)} kWh tejaladi`;
+  }
+},
+{
+  id: 'quvur', cat: 'Energetika', icon: 'pipe', title: 'Issiq suv quvuri',
+  q: 'Ko’chadagi issiq suv quvuri qancha issiqlik yo’qotadi va suv uyga yetguncha qancha soviydi?',
+  dim: '1D (silindr)', why: 'Quvur uzun va har tomondan bir xil sharoitda. Shuning uchun harorat faqat quvur markazidan masofaga (radiusga) bog’liq – <b>silindrik bir o’lchovli</b> masala. Tekis devordan farqi: tashqariga chiqqan sari sirt yuzasi kattalashadi.',
+  fields: [
+    { id: 'D', label: 'Quvur diametri (tashqi)', type: 'select', opts: [['57', '57 mm'], ['108', '108 mm'], ['159', '159 mm'], ['219', '219 mm']], def: '108' },
+    { id: 'Tw', label: 'Suv harorati', type: 'range', min: 40, max: 95, step: 1, unit: '°C', def: 70 },
+    { id: 'ins', label: 'Izolyatsiya', type: 'select', opts: [['none', 'Yo’q'], ['paxta', 'Mineral paxta'], ['ppu', 'Penopoliuretan']], def: 'paxta' },
+    { id: 'di', label: 'Izolyatsiya qalinligi', type: 'range', min: 0, max: 100, step: 5, unit: 'mm', def: 50 },
+    { id: 'To', label: 'Tashqi havo', type: 'range', min: -25, max: 30, step: 1, unit: '°C', def: -5 },
+    { id: 'wind', label: 'Shamol', type: 'select', opts: [['8', 'Tinch'], ['15', 'O’rtacha shamol'], ['30', 'Kuchli shamol']], def: '15' },
+    { id: 'Lp', label: 'Quvur uzunligi', type: 'range', min: 10, max: 2000, step: 10, unit: 'm', def: 300 },
+    { id: 'flow', label: 'Suv sarfi', type: 'range', min: 5, max: 500, step: 5, unit: 'l/min', def: 60 }
+  ],
+  run(v) {
+    const D = +v.D / 1000, wall = D < 0.08 ? 0.0035 : D < 0.17 ? 0.0045 : 0.006, r2 = D / 2, r1 = r2 - wall;
+    const ins = INSUL[v.ins], has = v.ins !== 'none' && v.di > 0, alpha = +v.wind;
+    const layers = [{ d: wall, lam: 50, rho: 7850, c: 490, n: 6, name: 'Po’lat' }];
+    if (has) layers.push({ d: v.di / 1000, lam: ins[1], rho: ins[2], c: ins[3], n: 30, name: ins[0] });
+    const base = { geom: 1, r0: r1, layers, inner: { type: 1, g: v.Tw }, outer: { type: 3, alpha, ue: v.To } };
+    const st = TL.steadyLayered(base), ql = TL.outerFlux(st.mesh, st.u, base.outer);
+    const st0 = TL.steadyLayered({ geom: 1, r0: r1, layers: [layers[0]], inner: base.inner, outer: base.outer });
+    const ql0 = TL.outerFlux(st0.mesh, st0.u, base.outer);
+    const P = ql * v.Lp, mdot = v.flow / 60, dT = (v.Tw - v.To) * (1 - Math.exp(-ql / (v.Tw - v.To) * v.Lp / (mdot * 4186)));
+    const Ts = st.u[st.u.length - 1];
+    const sim = TL.solveLayered(Object.assign({}, base, { T0: v.To, T: 6 * 3600, K: 720, theta: 0.5, frames: 240 }));
+    const R = sim.x[sim.x.length - 1];
+    return {
+      sim, x: sim.x, unitX: 'radius, mm', xScale: 1000, edges: [r2], range: [Math.min(v.To, 0), v.Tw],
+      answers: [
+        { label: 'Issiqlik yo’qotish', value: `${fmtNum(ql)} W/m`, note: `butun quvur: ${fmtNum(P / 1000)} kW, sutkada ${fmtNum(P * 24 / 1000)} kWh` },
+        { label: 'Suv quvur oxirida', value: C(v.Tw - dT), note: `yo’lda ${dT.toFixed(1)} °C soviydi`, verdict: dT < 2 ? 'ok' : dT < 6 ? 'info' : 'bad', vtext: dT < 2 ? 'yaxshi izolyatsiya' : dT < 6 ? 'qoniqarli' : 'issiqlik ko’p yo’qolmoqda' },
+        { label: 'Quvur sirtining harorati', value: C(Ts), verdict: Ts < 45 ? 'ok' : 'bad', vtext: Ts < 45 ? 'tegish xavfsiz' : 'kuyish xavfi – tegmang' },
+        has ? { label: 'Izolyatsiya foydasi', value: `${Math.round((1 - ql / ql0) * 100)} % kam`, note: `izolyatsiyasiz ${fmtNum(ql0)} W/m bo’lardi`, verdict: 'ok', vtext: `sutkada ${fmtNum((ql0 - ql) * v.Lp * 24 / 1000)} kWh tejaladi` }
+            : { label: 'Izolyatsiyasiz quvur', value: `${fmtNum(ql0)} W/m`, verdict: 'bad', vtext: '50 mm mineral paxta yo’qotishni bir necha marta kamaytiradi' }
+      ],
+      explain: `Issiq suv quvur devori va izolyatsiya orqali tashqi havoga issiqlik beradi, shamol bu jarayonni tezlashtiradi. Quvurda suv oqib turgani uchun yo’qotilgan issiqlik suvning sovishiga aylanadi: quvur qanchalik uzun va suv sarfi qanchalik kam bo’lsa, suv shuncha ko’p soviydi.`,
+      model: (u, col) => Models3D.pipe(sim.x, u, col, rgb((v.Tw - Math.min(v.To, 0)) / (v.Tw - Math.min(v.To, 0))), [
+        { p: [0, 0.0, 0.95], t: `Suv ${v.Tw} °C` }, { p: [0.75, 0.55, 0.3], t: `Havo ${v.To} °C` }]),
+      probeLabel: 'Quvur tashqi sirti', probeIdx: -1
+    };
+  }
+},
+{
+  id: 'tuxum', cat: 'Kundalik hayot', icon: 'egg', title: 'Tuxum qaynatish',
+  q: 'Tuxumni necha daqiqa qaynatish kerak – yumshoq yoki qattiq pishishi uchun?',
+  dim: '1D (shar)', why: 'Tuxum taxminan shar shaklida va qaynoq suvda har tomondan bir xil isiydi. Shuning uchun harorat faqat markazdan masofaga bog’liq – <b>sferik bir o’lchovli</b> masala. Eng sekin isiydigan joy – markaz (sarig’i).',
+  fields: [
+    { id: 'size', label: 'Tuxum o’lchami', type: 'select', opts: [['21', 'Kichik (S)'], ['22', 'O’rtacha (M)'], ['23.5', 'Katta (L)']], def: '22' },
+    { id: 'T0', label: 'Tuxum qayerdan olindi', type: 'select', opts: [['4', 'Muzlatkichdan (4 °C)'], ['20', 'Xona haroratida (20 °C)']], def: '4' },
+    { id: 'Tw', label: 'Suv qaynash harorati', type: 'select', opts: [['100', 'Tekislikda (100 °C)'], ['96', 'Tepalikda, 1200 m (96 °C)'], ['93', 'Tog’da, 2000 m (93 °C)']], def: '100' },
+    { id: 'goal', label: 'Qanday pishsin', type: 'select', opts: [['55', 'Yumshoq – sarig’i suyuq'], ['65', 'O’rtacha – sarig’i quyuq'], ['75', 'Qattiq – sarig’i to’liq pishgan']], def: '65' }
+  ],
+  run(v) {
+    const R = +v.size / 1000, lam = 0.54, rho = 1035, c = 3180, T0 = +v.T0, Tw = +v.Tw, goal = +v.goal;
+    const base = { geom: 2, r0: 0, layers: [{ d: R, lam, rho, c, n: 60 }], inner: { type: 2, q: 0 }, outer: { type: 3, alpha: 1500, ue: Tw }, T0 };
+    const sim = TL.solveLayered(Object.assign({}, base, { T: 25 * 60, K: 1500, theta: 0.5, frames: 300 }));
+    const ctr = sim.frames.map(f => f[0]), tGoal = crossTime(sim.times, ctr, goal, true);
+    const other = TL.solveLayered(Object.assign({}, base, { T0: T0 === 4 ? 20 : 4, T: 25 * 60, K: 1500, theta: 0.5, frames: 300 }));
+    const tOther = crossTime(other.times, other.frames.map(f => f[0]), goal, true);
+    const white = sim.frames.map(f => f[Math.round(f.length * 0.85)]), tWhite = crossTime(sim.times, white, 80, true);
+    return {
+      sim, x: sim.x, unitX: 'markazdan masofa, mm', xScale: 1000, edges: [], range: [T0, Tw], focus: tGoal,
+      answers: [
+        { label: 'Qaynatish vaqti', value: tGoal ? `${(tGoal / 60).toFixed(1)} daqiqa` : '25 daqiqadan ko’p', note: `sarig’i markazi ${goal} °C ga yetguncha (suvga solingandan boshlab)`, verdict: 'ok', vtext: 'tayyor bo’lganda darhol sovuq suvga soling' },
+        { label: T0 === 4 ? 'Xona haroratidagi tuxum' : 'Muzlatkichdagi tuxum', value: tOther ? `${(tOther / 60).toFixed(1)} daqiqa` : '—', note: T0 === 4 ? 'xona haroratidagi tuxum tezroq pishadi' : 'muzlatkichdan olingan tuxumga ko’proq vaqt kerak', verdict: 'info' },
+        { label: 'Oqi pishishi (qobiq ostida 80 °C)', value: tWhite ? `${(tWhite / 60).toFixed(1)} daqiqa` : '—', note: 'oq qismi sarig’idan ancha oldin pishadi' }
+      ],
+      explain: `Issiqlik qobiqdan markazga qarab sekin kiradi. Shuning uchun avval oqi, keyin sarig’i pishadi. Kattaroq tuxumga vaqt radius kvadratiga proporsional ko’payadi: 10 % katta tuxumga ≈ 20 % ko’proq vaqt kerak. Tog’da suv pastroq haroratda qaynagani uchun tuxum sekinroq pishadi. (Tuxum xossalari o’rtacha olingan, natija taxminiy.)`,
+      model: (u, col) => Models3D.egg(sim.x, u, col, [{ p: [0, 1.05, 0], t: `Suv ${Tw} °C` }, { p: [0.0, 0.0, 0.25], t: 'sarig’i' }]),
+      probeLabel: 'Tuxum markazi (sarig’i)', probeIdx: 0, timeAxis: 'min'
+    };
+  }
+},
+{
+  id: 'cpu', cat: 'Elektronika', icon: 'chip', title: 'Protsessor radiatori',
+  q: 'Tanlangan radiator protsessorni qizib ketishdan saqlay oladimi?',
+  dim: '2D', why: 'Issiqlik kichik protsessordan radiator plastinkasi bo’ylab <b>ikki yo’nalishda</b> (x va y) tarqaladi – bu <b>ikki o’lchovli (2D)</b> masala. Plastinka yupqa, qalinlik bo’yicha harorat deyarli bir xil; yuzalaridan va qovurg’alaridan havoga issiqlik chiqadi.',
+  fields: [
+    { id: 'mat', label: 'Radiator materiali', type: 'select', opts: [['al', 'Alyuminiy'], ['cu', 'Mis']], def: 'al' },
+    { id: 'L', label: 'Radiator o’lchami', type: 'range', min: 5, max: 14, step: 1, unit: 'sm', def: 9 },
+    { id: 'th', label: 'Asos qalinligi', type: 'range', min: 2, max: 10, step: 1, unit: 'mm', def: 5 },
+    { id: 'P', label: 'Protsessor quvvati', type: 'range', min: 10, max: 180, step: 5, unit: 'W', def: 65 },
+    { id: 'cool', label: 'Sovitish', type: 'select', opts: [['10', 'Oddiy plastinka, ventilyatorsiz'], ['55', 'Qovurg’ali, ventilyatorsiz'], ['160', 'Qovurg’ali + ventilyator']], def: '160' },
+    { id: 'Ta', label: 'Korpus ichidagi havo', type: 'range', min: 20, max: 45, step: 1, unit: '°C', def: 30 }
+  ],
+  run(v) {
+    const M = v.mat === 'cu' ? [401, 8960, 385] : [237, 2700, 900], L = v.L / 100, th = v.th / 1000, chip = 0.03;
+    const Qd = v.P / (chip * chip * th), rc = M[1] * M[2], half = chip / 2, n = 40;
+    const P2 = { Lx: L, Ly: L, Nx: n, Ny: n, T: 600, K: 300, a2: M[0] / rc, lam: M[0], beta: +v.cool / (rc * th), us: v.Ta,
+      f: (x, y, t) => (Math.abs(x - L / 2) <= half && Math.abs(y - L / 2) <= half ? Qd / rc : 0), init: () => v.Ta,
+      bc: { left: { type: 2, q: () => 0 }, right: { type: 2, q: () => 0 }, bottom: { type: 2, q: () => 0 }, top: { type: 2, q: () => 0 } },
+      scheme: 'adi', theta: 0.5, frames: 120 };
+    const r = TL.solve2D(P2), ci = (n / 2) * (n + 1) + n / 2;
+    const ctr = r.frames.map(f => f[ci]), Tmax = ctr[ctr.length - 1];
+    const t90 = crossTime(r.times, ctr, v.Ta + 0.9 * (Tmax - v.Ta), true);
+    let edge = 0; for (let i = 0; i <= n; i++) edge += r.u[i]; edge /= (n + 1);
+    const limit = 95;
+    return {
+      sim2: r, range: [v.Ta, Math.max(Tmax, v.Ta + 1)], L,
+      answers: [
+        { label: 'Protsessor harorati (10 daqiqadan keyin)', value: C(Tmax), verdict: Tmax < 80 ? 'ok' : Tmax < limit ? 'info' : 'bad', vtext: Tmax < 80 ? 'xavfsiz' : Tmax < limit ? `chegaraga yaqin (${limit} °C)` : `qizib ketadi – ${limit} °C dan oshdi, protsessor tezligini pasaytiradi` },
+        { label: 'Radiator chetidagi harorat', value: C(edge), note: 'chet va markaz farqi kichik bo’lsa, radiator yaxshi ishlaydi' },
+        { label: 'Qizib bo’lish vaqti', value: t90 ? fmtTime(t90) : '10 daqiqadan ko’p', note: 'oxirgi haroratning 90 % iga yetguncha' }
+      ],
+      explain: `Protsessor ajratgan issiqlik avval radiator asosi bo’ylab tarqaladi, keyin yuzalar va qovurg’alar orqali havoga chiqadi. Mis alyuminiydan yaxshiroq o’tkazadi, shuning uchun harorat chetlarga tekisroq tarqaladi. Ventilyator havo oqimini kuchaytirib, issiqlik berishni bir necha marta oshiradi.`,
+      model: (u, col) => Models3D.plate(u, r.nx, r.ny, L, L, col, { thick: th, chip, fins: +v.cool > 20, labels: [{ p: [0, 0.32, 0], t: `${v.P} W` }] }),
+      probeLabel: 'Protsessor markazi', probe2: ci
+    };
+  }
+},
+{
+  id: 'payvand', cat: 'Metallurgiya', icon: 'weld', title: 'Payvand chokining sovishi',
+  q: 'Payvandlangan joy qancha tezlikda soviydi – metall mo’rt bo’lib qolmaydimi va qachon ushlash mumkin?',
+  dim: '2D', why: 'Yupqa plastinkada issiqlik payvand nuqtasidan <b>har tomonga</b> (x va y) tarqaladi, qalinlik bo’yicha harorat deyarli bir xil. Shuning uchun <b>ikki o’lchovli (2D)</b> masala.',
+  fields: [
+    { id: 'mat', label: 'Metall', type: 'select', opts: [['st', 'Uglerodli po’lat'], ['ss', 'Zanglamas po’lat']], def: 'st' },
+    { id: 'th', label: 'Plastinka qalinligi', type: 'range', min: 2, max: 12, step: 1, unit: 'mm', def: 6 },
+    { id: 'P', label: 'Payvandlash yoyi quvvati', type: 'range', min: 1, max: 8, step: 0.5, unit: 'kW', def: 3 },
+    { id: 'ta', label: 'Yoy yonish vaqti (bir nuqtada)', type: 'range', min: 3, max: 30, step: 1, unit: 's', def: 15 },
+    { id: 'pre', label: 'Oldindan qizdirish', type: 'select', opts: [['20', 'Yo’q (20 °C)'], ['150', '150 °C gacha'], ['250', '250 °C gacha']], def: '20' },
+    { id: 'cool', label: 'Sovish usuli', type: 'select', opts: [['10', 'Havoda, tabiiy'], ['40', 'Shamolda / puflash'], ['400', 'Suv purkab sovitish']], def: '10' }
+  ],
+  run(v) {
+    const M = { st: [50, 7850, 490, 1450], ss: [16, 8000, 500, 1400] }[v.mat];
+    const L = 0.12, th = v.th / 1000, r0 = 0.006, rc = M[1] * M[2], Tp = +v.pre, n = 50, a = +v.cool;
+    const Q0 = v.P * 1000 * 0.75 / (Math.PI * r0 * r0 * th); // yoy foydali ish koeffitsienti 0.75
+    const mk = (T, K, frames, probe) => ({ Lx: L, Ly: L, Nx: n, Ny: n, T, K, a2: M[0] / rc, lam: M[0], beta: 2 * a / (rc * th), us: 20,
+      f: (x, y, t) => (t <= v.ta ? Q0 / rc * Math.exp(-((x - L / 2) ** 2 + (y - L / 2) ** 2) / (r0 * r0)) : 0), init: () => Tp,
+      bc: { left: { type: 3, alpha: a, ue: 20, q: () => 0 }, right: { type: 3, alpha: a, ue: 20, q: () => 0 }, bottom: { type: 3, alpha: a, ue: 20, q: () => 0 }, top: { type: 3, alpha: a, ue: 20, q: () => 0 } },
+      scheme: 'adi', theta: 0.5, frames, probe });
+    const ci = (n / 2) * (n + 1) + n / 2;
+    const r = TL.solve2D(mk(900, 450, 150));
+    const hi = TL.solve2D(Object.assign(mk(v.ta + 90, Math.round((v.ta + 90) / 0.2), 2, null), { Nx: 40, Ny: 40, probe: 20 * 41 + 20 })); // har 0.2 s da markaz harorati
+    const ht = hi.probeVals.map((_, j) => j * hi.tau), hv = hi.probeVals;
+    const peak = Math.max(...hv), ip = hv.indexOf(peak);
+    const t8 = crossTime(ht.slice(ip), hv.slice(ip), 800, false), t5 = crossTime(ht.slice(ip), hv.slice(ip), 500, false);
+    const t85 = t8 != null && t5 != null ? t5 - t8 : null;
+    const ctr = r.frames.map(f => f[ci]), ipk = ctr.indexOf(Math.max(...ctr));
+    const t200 = crossTime(r.times.slice(ipk), ctr.slice(ipk), 200, false), t50 = crossTime(r.times.slice(ipk), ctr.slice(ipk), 50, false);
+    const melts = peak >= M[3];
+    return {
+      sim2: r, range: [20, M[3]], L, focus: v.ta + 4,
+      answers: [
+        { label: 'Payvand nuqtasi', value: melts ? `≥ ${M[3]} °C` : C(peak), verdict: melts ? 'ok' : 'bad', vtext: melts ? 'metall eriydi – chok hosil bo’ladi' : 'yetarli qizimadi – quvvat yoki vaqtni oshiring' },
+        { label: 'Sovish vaqti t₈/₅ (800 → 500 °C)', value: t85 != null ? `${t85.toFixed(1)} s` : '—', note: 'payvandlash sifatining asosiy ko’rsatkichi',
+          verdict: t85 == null ? 'info' : t85 < 5 ? 'bad' : t85 <= 25 ? 'ok' : 'info',
+          vtext: t85 == null ? '800 °C ga yetmadi' : t85 < 5 ? 'juda tez – po’lat toblanib mo’rt bo’lishi mumkin; oldindan qizdiring' : t85 <= 25 ? 'me’yorda (taxminan 5–25 s)' : 'sekin – mustahkamlik biroz pasayishi mumkin' },
+        { label: '200 °C gacha sovish', value: t200 ? fmtTime(t200) : '15 daqiqadan ko’p', note: 'eng qizigan paytdan boshlab; keyin ishlovni davom ettirish mumkin' },
+        { label: 'Qo’l bilan ushlash (50 °C)', value: t50 ? fmtTime(t50) : '15 daqiqadan ko’p', verdict: 'info', vtext: 'undan oldin faqat qo’lqop bilan' }
+      ],
+      explain: `Yoy yonib turganda nuqta qiziydi, o’chgach issiqlik metall ichiga tarqaladi va sirtdan havoga chiqadi. Yupqa plastinka va kuchli sovitish tez soviydi. Po’lat juda tez sovisa toblanib mo’rt bo’ladi – shuning uchun detallar oldindan qizdiriladi: t₈/₅ qanday uzayishini tekshirib ko’ring. Soddalashtirilgan model: erish issiqligi va suyuq vannadagi oqim hisobga olinmagan, natija sifat jihatdan to’g’ri.`,
+      model: (u, col) => Models3D.plate(u, r.nx, r.ny, L, L, col, { thick: th, labels: [{ p: [0, 0.35, 0], t: 'payvand nuqtasi' }] }),
+      probeLabel: 'Payvand nuqtasi markazi', probe2: ci
+    };
+  }
+}];
+
+// ======================= INTERFEYS =======================
+let cur = null, res = null, view = null, J = 0, playing = false;
+const ICONS = {
+  house: '<path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/>',
+  pipe: '<rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 8v8M18 8v8"/><path d="M9 4c0 1 1 1 1 2s-1 1-1 2M14 4c0 1 1 1 1 2s-1 1-1 2"/>',
+  egg: '<path d="M12 3c4 0 7 6 7 11a7 7 0 0 1-14 0c0-5 3-11 7-11z"/><circle cx="12" cy="14" r="3"/>',
+  chip: '<rect x="6" y="6" width="12" height="12" rx="1"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+  weld: '<path d="M4 20 14 10"/><path d="M14 10l3-3 2 2-3 3z"/><path d="M18 14l2 1M17 17l1 2M20 11l2-1"/><path d="M3 21h8"/>'
+};
+const icon = k => `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+function fieldHTML(f) {
+  const id = 'am-' + f.id;
+  if (f.type === 'select') return `<div class="f"><label for="${id}">${f.label}</label><select id="${id}">${f.opts.map(([k, t]) => `<option value="${k}"${k === f.def ? ' selected' : ''}>${t}</option>`).join('')}</select></div>`;
+  if (f.type === 'check') return `<label class="chk"><input type="checkbox" id="${id}"${f.def ? ' checked' : ''}> ${f.label}</label>`;
+  if (f.type === 'number') return `<div class="f"><label for="${id}">${f.label}, ${f.unit}</label><input type="number" id="${id}" value="${f.def}" step="any"></div>`;
+  return `<div class="f rng"><label for="${id}">${f.label}: <output id="${id}-o">${f.def} ${f.unit}</output></label><input type="range" id="${id}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.def}"></div>`;
+}
+function read() {
+  const v = {};
+  for (const f of cur.fields) {
+    const el = $('am-' + f.id);
+    v[f.id] = f.type === 'check' ? el.checked : f.type === 'select' ? el.value : parseFloat(el.value);
+    if (f.type === 'range') $('am-' + f.id + '-o').textContent = el.value + ' ' + f.unit;
+  }
+  return v;
+}
+function colorOf(u) { const [lo, hi] = res.range; return rgb((u - lo) / (hi - lo || 1)); }
+function frames() { return res.sim ? res.sim.frames : res.sim2.frames; }
+function times() { return res.sim ? res.sim.times : res.sim2.times; }
+
+function select(id) {
+  cur = SCEN.find(s => s.id === id);
+  document.querySelectorAll('.scen').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === id));
+  $('am-title').textContent = cur.title; $('am-q').textContent = cur.q;
+  $('am-dim').innerHTML = `<span class="dimtag">${cur.dim}</span> ${cur.why}`;
+  $('am-form').innerHTML = cur.fields.map(fieldHTML).join('');
+  $('am-form').querySelectorAll('input,select').forEach(el => el.addEventListener(el.type === 'range' ? 'input' : 'change', schedule));
+  run();
+}
+let deb; function schedule() { read(); clearTimeout(deb); deb = setTimeout(run, 150); }
+function run() {
+  const v = read(); res = cur.run(v); if (cur.fixup) cur.fixup(res, v);
+  const ts = times(); J = ts.length - 1; $('am-time').max = J;
+  if (res.focus != null) { let best = 0; ts.forEach((t, j) => { if (Math.abs(t - res.focus) < Math.abs(ts[best] - res.focus)) best = j; }); J = best; }
+  $('am-time').value = J;
+  $('am-ans').innerHTML = res.answers.map(a => `<div class="ans ${a.verdict || ''}"><span>${a.label}</span><b>${a.value}</b>${a.note ? `<small>${a.note}</small>` : ''}${a.vtext ? `<em>${a.verdict === 'ok' ? '✓ ' : a.verdict === 'bad' ? '⚠ ' : ''}${a.vtext}</em>` : ''}</div>`).join('');
+  $('am-explain').innerHTML = res.explain;
+  drawAll();
+}
+function drawAll() {
+  const fr = frames(), ts = times(), u = fr[J];
+  view.set(...Object.values(res.model(u, colorOf)));
+  const T = ts[ts.length - 1];
+  $('am-tval').textContent = 't = ' + fmtTime(ts[J]);
+  // rang shkalasi
+  const [lo, hi] = res.range; $('am-cb').innerHTML = `<span>${C(lo)}</span><i></i><span>${C(hi)}</span>`;
+  // grafiklar
+  if (res.sim) {
+    const xs = res.x.map(x => (x - res.x[0]) * res.xScale);
+    plot($('am-prof'), xs, [{ ys: Array.from(fr[0]), c: '#9aa7b5', d: [5, 4] }, { ys: Array.from(u), c: '#c4401f', w: 2.6 }], res.range, v => (+v.toPrecision(3)) + '', res.unitX, res.edges.map(e => (e - res.x[0]) * res.xScale));
+    $('am-profT').textContent = 'Harorat ' + (cur.id === 'devor' ? 'devor qalinligi bo’ylab (chap – xona, o’ng – ko’cha)' : cur.id === 'quvur' ? 'quvur devori va izolyatsiya bo’ylab (chap – suv, o’ng – havo)' : 'markazdan qobiqqacha (chap – sarig’i, o’ng – qobiq)');
+  } else {
+    const r = res.sim2, k = (r.ny - 1) / 2, xs = Array.from(r.X).map(x => x * 100);
+    plot($('am-prof'), xs, [{ ys: xs.map((_, i) => fr[0][k * r.nx + i]), c: '#9aa7b5', d: [5, 4] }, { ys: xs.map((_, i) => u[k * r.nx + i]), c: '#c4401f', w: 2.6 }], res.range, v => (+v.toPrecision(3)) + '', 'markazdan o’tgan kesim, sm', []);
+    $('am-profT').textContent = 'Harorat plastinka markazidan o’tgan chiziq bo’ylab';
+  }
+  const idx = res.sim ? (res.probeIdx < 0 ? fr[0].length - 1 : res.probeIdx) : res.probe2;
+  const ys = fr.map(f => f[idx]);
+  let lo2 = Math.min(...ys), hi2 = Math.max(...ys); if (hi2 - lo2 < 0.5) { lo2 -= 0.5; hi2 += 0.5; }
+  plot($('am-probe'), ts, [{ ys, c: '#1d5ea8', w: 2.4 }], [lo2 - (hi2 - lo2) * 0.08, hi2 + (hi2 - lo2) * 0.08], s => axisTime(s, T), 'vaqt', [], ts[J]);
+  $('am-probeT').textContent = res.probeLabel + ': ' + C(ys[J]);
+}
+function plot(cv, xs, series, range, xfmt, xtitle, vlines, marker) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1; if (!r.width) return;
+  cv.width = r.width * dpr; cv.height = r.height * dpr; const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const w = r.width, h = r.height, ml = 52, mr = 10, mt = 22, mb = 30, pw = w - ml - mr, ph = h - mt - mb;
+  const [lo, hi] = range, x0 = xs[0], x1 = xs[xs.length - 1];
+  const X = v => ml + (v - x0) / (x1 - x0 || 1) * pw, Y = v => mt + ph - (v - lo) / (hi - lo || 1) * ph;
+  c.font = '12px "IBM Plex Mono", monospace'; c.strokeStyle = '#d2d9e2'; c.fillStyle = '#56657a';
+  const ticks = (a, b, n) => { const s0 = (b - a) / n, m = Math.pow(10, Math.floor(Math.log10(s0))), st = [1, 2, 2.5, 5, 10].map(k => k * m).find(k => k >= s0); const o = []; for (let v = Math.ceil(a / st) * st; v <= b + 1e-9; v += st) o.push(+v.toPrecision(10)); return o; };
+  for (const v of ticks(lo, hi, 4)) { c.beginPath(); c.moveTo(ml, Y(v)); c.lineTo(w - mr, Y(v)); c.stroke(); c.textAlign = 'right'; c.fillText(n1(v), ml - 6, Y(v) + 4); }
+  for (const v of ticks(x0, x1, 5)) { c.textAlign = 'center'; c.fillText(xfmt(v), X(v), h - mb + 16); }
+  c.textAlign = 'left'; c.fillText('°C', 6, 12); c.textAlign = 'right'; c.fillText(xtitle, w - mr, h - 2);
+  c.save(); c.beginPath(); c.rect(ml, mt, pw, ph); c.clip();
+  for (const e of vlines || []) { c.strokeStyle = '#8a96a6'; c.setLineDash([2, 3]); c.beginPath(); c.moveTo(X(e), mt); c.lineTo(X(e), mt + ph); c.stroke(); }
+  c.setLineDash([]);
+  for (const s of series) { c.strokeStyle = s.c; c.lineWidth = s.w || 1.6; c.setLineDash(s.d || []); c.beginPath(); s.ys.forEach((v, i) => i ? c.lineTo(X(xs[i]), Y(v)) : c.moveTo(X(xs[i]), Y(v))); c.stroke(); }
+  c.setLineDash([]);
+  if (marker != null) { c.strokeStyle = '#15202c'; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(X(marker), mt); c.lineTo(X(marker), mt + ph); c.stroke(); }
+  c.restore();
+}
+
+function init() {
+  $('am-cats').innerHTML = SCEN.map(s => `<button class="scen" type="button" data-id="${s.id}" aria-pressed="false"><span class="ico">${icon(s.icon)}</span><span><small>${s.cat}</small><b>${s.title}</b></span></button>`).join('');
+  document.querySelectorAll('.scen').forEach(b => b.addEventListener('click', () => select(b.dataset.id)));
+  view = new View3D($('am-3d'));
+  $('am-time').addEventListener('input', e => { J = +e.target.value; drawAll(); });
+  let last = 0;
+  const tick = ts => {
+    if (!playing) return;
+    if (ts - last > 40) { last = ts; const n = frames().length; J = Math.min(n - 1, J + Math.max(1, Math.round(n / 150))); $('am-time').value = J; drawAll();
+      if (J >= n - 1) { playing = false; $('am-play').textContent = '▶ Qaytadan'; } }
+    if (playing) requestAnimationFrame(tick);
+  };
+  $('am-play').addEventListener('click', () => {
+    if (playing) { playing = false; $('am-play').textContent = '▶ Davom etish'; return; }
+    if (J >= frames().length - 1) J = 0; playing = true; $('am-play').textContent = '❚❚ To’xtatish'; requestAnimationFrame(tick);
+  });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (res && !$('p-real').hidden) drawAll(); }, 100); });
+  select('devor');
+}
+window.TermoAmaliy = { init, redraw: () => res && drawAll() };
+})();
+
+</script>
+<script>TermoAmaliy.init();</script>
 </body>
 </html>

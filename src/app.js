@@ -477,7 +477,7 @@ function bind() {
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
     document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
     document.querySelectorAll('.panel').forEach(p => p.hidden = p.id !== 'p-' + b.dataset.tab);
-    if (b.dataset.tab === 'lab') drawAll(); if (b.dataset.tab === 'stab') drawG(); if (b.dataset.tab === 'conv' && !cvDone) runConv(); if (b.dataset.tab === 'rel' && !relDone) reliability();
+    if (b.dataset.tab === 'lab') drawAll(); if (b.dataset.tab === 'real' && window.TermoAmaliy) TermoAmaliy.redraw(); if (b.dataset.tab === 'stab') drawG(); if (b.dataset.tab === 'conv' && !cvDone) runConv(); if (b.dataset.tab === 'rel' && !relDone) reliability();
   }));
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { drawAll(); drawG(); if (cvLast) plotConv(cvLast); }, 100); });
 }
