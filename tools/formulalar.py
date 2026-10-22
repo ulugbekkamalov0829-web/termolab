@@ -53,6 +53,10 @@ F = {
  # Fizik kattaliklar
  'biot':     r'\mathrm{Bi}=\dfrac{\alpha\,h}{\lambda}',
  'flux':     r'q=-\lambda\,\dfrac{\partial u}{\partial n}',
+ # Analitik yechimlar (barqaror holat)
+ 'wall':     r'q=\dfrac{u_i-u_o}{\dfrac{1}{\alpha_i}+\dfrac{L}{\lambda}+\dfrac{1}{\alpha_o}}',
+ 'wire':     r'u_{\max}-u_s=\dfrac{Q}{\lambda m^2}\left(1-\dfrac{1}{\cosh(mL/2)}\right),\qquad m^2=\dfrac{4\alpha_s}{\lambda d}',
+ 'fin':      r'\dfrac{u(L)-u_s}{u(0)-u_s}=\dfrac{1}{\cosh mL+\dfrac{\alpha}{m\lambda}\sinh mL}',
 }
 
 

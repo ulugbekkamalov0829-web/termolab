@@ -49,6 +49,14 @@ JavaScript (`src/core.js`) va mustaqil yozilgan Python (`python/termolab.py`) ve
 (masalan, 2D ADI, N = 32: ikkalasida 3.736·10⁻⁴). Darslikdagi 3-masala (L = 8, T = 3, N = 50, K = 200) natijasi
 va Zeydel iteratsiyalari soni (992) toʻliq takrorlanadi. Toʻliq natijalar: `tests/natijalar.txt`.
 
+Barqaror holatdagi analitik yechimlar bilan solishtirish (`tests/fizik_natijalar.txt`):
+
+| Masala | TermoLab | Analitik |
+|---|---|---|
+| Beton devor 30 sm, issiqlik oqimi | 78.38 W/m² | 78.38 W/m² |
+| Nixrom qizdirgich sim, maks. harorat | 352.88 °C | 352.88 °C |
+| Mis sterjen (qovurgʻa) uchidagi harorat | 51.411 °C | 51.411 °C |
+
 ## Tuzilma
 
 ```
@@ -60,7 +68,9 @@ formulas/               formulalar (SVG, Computer Modern) — tools/formulalar.p
 python/termolab.py      mustaqil Python/NumPy versiyasi
 python/tekshiruv.py     yaqinlashish tartibi va darslik masalasi
 python/kitob_3_masala.py darslikdagi algoritmning aynan takrori (992 iteratsiya)
-tests/convergence.test.js  JS yadro testlari
+tests/convergence.test.js  JS yadro testlari (yaqinlashish tartibi)
+tests/fizik_tekshiruv.test.js  analitik yechimlar bilan solishtirish
+TAQDIMOT_NUTQI.md       taqdimot rejasi va hakamlar savollari
 tools/build.py          index.html ni yigʻish
 ```
 

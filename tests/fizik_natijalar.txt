@@ -1,0 +1,4 @@
+Devor: q_sonli = 78.38 W/m2, q_analitik = 78.38 W/m2, ichki sirt 10.20 C (analitik 10.20 C)
+  48 soatda: q = 79.28 W/m2
+Sim: u_max sonli = 352.88 C, analitik = 352.88 C
+Mis sterjen: uch harorati sonli = 51.411 C, analitik (qovurg'a) = 51.411 C
