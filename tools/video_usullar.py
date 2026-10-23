@@ -113,7 +113,7 @@ for k, m in enumerate(M):
     panels.append(dict(m=m, ax=ax, ex=ex_l, num=num_l, im=im, badge=badge))
 footer(fig)
 for f in range(N2):
-    ttl.set_text('Ko’k chiziq — usul natijasi, punktir — aniq javob. Ustma-ust tushsa, usul to’g’ri.' if f < 7 * FPS else ('Diqqat: oshkor sxema katta qadamda “portlaydi”!' if f < ANIM else 'Endi har bir usulning xatosi va tezligini o’lchaymiz.'))
+    ttl.set_text('Ko’k chiziq — usul natijasi, punktir — aniq javob. Ustma-ust tushsa, usul to’g’ri.' if f < 7 * FPS else ('Diqqat: oshkor sxema katta qadamda “portlaydi”, kichik qadamda aniq — lekin 4800 qadam kerak!' if f < ANIM else 'Endi har bir usulning xatosi va tezligini o’lchaymiz.'))
     p = min(1, f / ANIM); t = p * T; clock.set_text(f't = {t / 60:4.1f} daqiqa')
     for P in panels:
         m = P['m']; fr = m['frames']; j = min(len(fr) - 1, int(round(p * (len(fr) - 1))))
@@ -149,7 +149,7 @@ for f in range(N3):
         col = RED if blown else (GREEN if k == best else ('#6aa585' if ok else AMBER))
         width = 10 ** (np.log10(0.1) + g * (np.log10(max(m['ms'], 0.12)) - np.log10(0.1)))
         ax.barh(row, width - 0.1, left=0.1, height=0.62, color=col, alpha=g)
-        lab = f'{m["name"]} {m["sub"]}'.replace('katta qadam ', '').replace('kichik qadam ', '')
+        lab = f'{m["name"]} {m["sub"]}'.replace('Oshkor — KATTA qadam τ = 10 s (60 qadam)', 'Oshkor, katta qadam (τ = 10 s)').replace('Oshkor — KICHIK qadam τ = 0.125 s (4800 qadam)', 'Oshkor, kichik qadam (τ = 0.125 s)')
         fig.text(0.295, 0.16 + 0.68 * (row + 0.6) / len(M) - 0.012, lab, fontsize=17, ha='right', weight='bold' if k == best else 'normal', alpha=g)
         txt = 'portladi' if blown else f'{m["ms"]:.1f} ms · xato {m["err"]:.3f} °C'
         ax.text(width * 1.15, row, txt, va='center', fontsize=15, color=col, alpha=g, weight='bold' if k == best else 'normal')
