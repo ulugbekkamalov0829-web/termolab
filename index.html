@@ -191,7 +191,7 @@ table.soltab td.l{text-align:left}
   <header>
     <div>
       <h1>Termo<span>Lab</span></h1>
-      <p class="sub">Jism ichida issiqlik qanday tarqalishini ko’rsatadigan virtual laboratoriya: sterjen, devor va plastinka uchun haroratni vaqt bo’yicha hisoblaydi.</p>
+      <p class="sub">Issiqlik qanday tarqalishini hisoblaydigan virtual laboratoriya: devor, quvur, beton, radiator, konserva bankasi va boshqa jismlarda harorat vaqt bo’yicha qanday o’zgarishini ko’rsatadi va amaliy tavsiya beradi.</p>
     </div>
   </header>
 
@@ -1264,7 +1264,7 @@ table.soltab td.l{text-align:left}
   const now = () => (root.performance ? root.performance.now() : Date.now());
   // 1D test: po'lat sterjen, uchlari 0 °C, boshlang'ich harorat 100·sin(πx/L)
   // aniq yechim: u = 100 e^{-a²π²t/L²} sin(πx/L)
-  const P1 = { L: 0.2, a2: 1.4e-5, lam: 50, T: 600, N: 50 };
+  const P1 = { L: 0.2, a2: 1.4e-5, lam: 50, T: 600, N: 100 };
   // 2D test: po'lat plastinka 0.2×0.2 m, chetlari 0 °C, aniq yechim: u = 100 e^{-2a²π²t/L²} sin sin
   const P2 = { L: 0.2, a2: 1.4e-5, lam: 50, T: 600, N: 40 };
   function exact1(x, t) { return 100 * Math.exp(-P1.a2 * Math.PI ** 2 * t / P1.L ** 2) * Math.sin(Math.PI * x / P1.L); }
@@ -1288,7 +1288,7 @@ table.soltab td.l{text-align:left}
   }
   const M1 = [
     { name: 'Oshkor sxema (katta qadam)', theta: 0, K: 60, short: 'Oshkor, τ = 10 s' },
-    { name: 'Oshkor sxema (kichik qadam, Fo ≤ ½)', theta: 0, K: 1200, short: 'Oshkor, τ = 0.5 s' },
+    { name: 'Oshkor sxema (kichik qadam, Fo ≤ ½)', theta: 0, K: 4800, short: 'Oshkor, τ = 0.125 s' },
     { name: 'Oshkormas + haydash usuli', theta: 1, K: 60, solver: 'thomas', short: 'Oshkormas + haydash' },
     { name: 'Oshkormas + Zeydel iteratsiyasi', theta: 1, K: 60, solver: 'seidel', short: 'Oshkormas + Zeydel' },
     { name: 'Krank–Nikolson + Zeydel', theta: 0.5, K: 60, solver: 'seidel', short: 'Krank–Nikolson + Zeydel' },

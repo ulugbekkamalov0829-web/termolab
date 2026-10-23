@@ -116,3 +116,8 @@ python python/tekshiruv.py          # Python tekshiruv
 python tools/formulalar.py          # formulalarni qayta yaratish (matplotlib)
 python tools/build.py               # index.html ni yigʻish
 ```
+
+
+## Taqdimot va video
+- `TermoLab_taqdimot.pptx` — 16 slaydli taqdimot (usullar, sayt, nega kerak, tekshiruv).
+- `media/termolab_usullar.mp4` — 30 soniyalik video: 6 usul bir masalada, eng maqbuli aniqlanadi.
