@@ -1,6 +1,6 @@
 # Taqdimot nutqi: “Sterjenda issiqlik tarqalishi: usullar va TermoLab”
 
-Umumiy vaqt: taxminan 10–12 daqiqa (video 51 soniya). Har bir slaydning ostida (Izohlar/Notes) ham shu matn bor – PowerPoint’da “Presenter view” da o’qib turishingiz mumkin.
+Umumiy vaqt: taxminan 10–12 daqiqa (video 51 soniya). Matn taqdimot faylida yo’q – alohida o’qing yoki chop eting.
 
 **Maslahat:** matnni yod olish shart emas – har slayddagi 1–2 asosiy fikrni ayting. Quyida qo’shtirnoq ichidagisi – aytiladigan so’zlar.
 
