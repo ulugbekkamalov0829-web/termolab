@@ -1,5 +1,5 @@
 """TermoLab: 30 soniyalik video — bitta masala 6 usulda, eng maqbul usul."""
-import json, subprocess, sys, os
+import json, subprocess, sys, os, textwrap
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -47,7 +47,7 @@ def footer(fig, alpha=1):
     fig.text(0.97, 0.03, SITE, fontsize=18, color=BLUE, ha='right', alpha=alpha, family='DejaVu Sans Mono')
 
 # ---------------- 1-sahna: masala (0–3.5 s) ----------------
-N1 = int(3.5 * FPS)
+N1 = int(6 * FPS)
 for f in range(N1):
     fig = new_fig(); a = ease(f / (0.8 * FPS)); b = ease((f - 0.7 * FPS) / (0.8 * FPS)); c = ease((f - 1.5 * FPS) / (0.8 * FPS))
     fig.text(0.07, 0.80, 'BITTA MASALA — OLTI USUL', fontsize=26, weight='bold', color=ACC, alpha=a)
@@ -55,6 +55,7 @@ for f in range(N1):
     fig.text(0.07, 0.50, r'$\dfrac{\partial u}{\partial t} = a^2\,\dfrac{\partial^2 u}{\partial x^2}$', fontsize=58, alpha=b)
     fig.text(0.37, 0.535, 'Po’lat sterjen, uzunligi 20 sm, uchlari 0 °C, vaqt 10 daqiqa.', fontsize=26, alpha=b)
     fig.text(0.37, 0.475, 'Aniq yechim ma’lum — har bir usulning xatosini o’lchaymiz.', fontsize=26, color=MUTED, alpha=b)
+    fig.text(0.07, 0.10, 'Savol: 10 daqiqadan keyingi haroratni qaysi usul eng yaxshi hisoblaydi?', fontsize=28, weight='bold', color=ACC, alpha=ease((f - 2.8 * FPS) / (0.8 * FPS)))
     ax = fig.add_axes([0.07, 0.24, 0.86, 0.09]); ax.axis('off')
     ax.imshow(exact(0)[None, :], aspect='auto', cmap=CMAP, vmin=0, vmax=100, alpha=c, extent=[0, L, 0, 1])
     ax.add_patch(FancyBboxPatch((0, 0), L, 1, boxstyle='round,pad=0,rounding_size=0.3', fill=False, ec=INK, lw=1.5, alpha=c))
@@ -62,10 +63,36 @@ for f in range(N1):
     footer(fig, a)
     emit(fig); plt.close(fig)
 
+# ---------------- 1b-sahna: usullar nimasi bilan farq qiladi (8 s) ----------------
+N1B = int(8 * FPS)
+cards = [('OSHKOR sxema', RED, 'Yangi qatlam eskisidan bevosita hisoblanadi.', 'Juda tez, lekin katta qadamda “portlaydi”.'),
+         ('OSHKORMAS sxema', AMBER, 'Yangi qatlam tenglamalar sistemasidan topiladi.', 'Hamisha turg’un, lekin aniqligi pastroq.'),
+         ('KRANK–NIKOLSON', GREEN, 'Oshkor va oshkormasning o’rtachasi.', 'Turg’un va aniq — ikkalasining yaxshisi.')]
+solv = [('ZEYDEL iteratsiyasi', 'sistemani taxmin qilib, yuzlab marta yaxshilaydi — sekin'),
+        ('HAYDASH usuli', 'sistemani bir o’tishda to’g’ridan-to’g’ri yechadi — tez')]
+for f in range(N1B):
+    fig = new_fig(); a = ease(f / (0.6 * FPS))
+    fig.text(0.05, 0.90, 'Olti usul nimasi bilan farq qiladi?', fontsize=44, weight='bold', alpha=a)
+    fig.text(0.05, 0.835, 'Usul = sxema (vaqt qadami qanday olinadi) + sistema yechish usuli', fontsize=24, color=MUTED, alpha=a)
+    for i, (h, col, t1, t2) in enumerate(cards):
+        g = ease((f - (0.5 + 0.7 * i) * FPS) / (0.5 * FPS)); x0 = 0.05 + i * 0.31
+        fig.patches.append(FancyBboxPatch((x0, 0.44), 0.29, 0.34, boxstyle='round,pad=0.005,rounding_size=0.01', transform=fig.transFigure, fc='white', ec=col, lw=3, alpha=g))
+        fig.text(x0 + 0.015, 0.735, h, fontsize=26, weight='bold', color=col, alpha=g)
+        fig.text(x0 + 0.015, 0.69, textwrap.fill(t1, 30), fontsize=20, alpha=g, va='top')
+        fig.text(x0 + 0.015, 0.575, textwrap.fill(t2, 30), fontsize=20, color=col, weight='bold', alpha=g, va='top')
+    fig.text(0.05, 0.37, 'Har qadamda hosil bo’ladigan sistemani yechish:', fontsize=26, weight='bold', alpha=ease((f - 3.0 * FPS) / (0.5 * FPS)))
+    for i, (h, t) in enumerate(solv):
+        g = ease((f - (3.6 + 0.8 * i) * FPS) / (0.5 * FPS)); x0 = 0.05 + i * 0.47
+        fig.patches.append(FancyBboxPatch((x0, 0.17), 0.45, 0.15, boxstyle='round,pad=0.005,rounding_size=0.01', transform=fig.transFigure, fc='white', ec=BLUE, lw=3, alpha=g))
+        fig.text(x0 + 0.015, 0.275, h, fontsize=24, weight='bold', color=BLUE, alpha=g)
+        fig.text(x0 + 0.015, 0.20, t, fontsize=19, alpha=g)
+    fig.text(0.05, 0.08, '3 sxema × 2 yechish usuli = 6 usul (oshkor sxemada sistema yo’q). Hammasini bitta masalada solishtiramiz.', fontsize=22, color=MUTED, alpha=ease((f - 5.5 * FPS) / (0.6 * FPS)))
+    footer(fig, a); emit(fig); plt.close(fig)
+
 # ---------------- 2-sahna: barcha usullar parallel (3.5–17 s) ----------------
-N2 = int(13.5 * FPS); ANIM = int(10.5 * FPS)
+N2 = int(15 * FPS); ANIM = int(11.5 * FPS)
 fig = new_fig()
-fig.text(0.04, 0.925, 'Hammasi bir vaqtda: ko’k chiziq — sonli yechim, punktir — aniq yechim', fontsize=24, weight='bold')
+ttl = fig.text(0.04, 0.925, '', fontsize=22, weight='bold')
 clock = fig.text(0.96, 0.925, '', fontsize=26, ha='right', family='DejaVu Sans Mono', color=MUTED)
 panels = []
 for k, m in enumerate(M):
@@ -86,6 +113,7 @@ for k, m in enumerate(M):
     panels.append(dict(m=m, ax=ax, ex=ex_l, num=num_l, im=im, badge=badge))
 footer(fig)
 for f in range(N2):
+    ttl.set_text('Ko’k chiziq — usul natijasi, punktir — aniq javob. Ustma-ust tushsa, usul to’g’ri.' if f < 7 * FPS else ('Diqqat: oshkor sxema katta qadamda “portlaydi”!' if f < ANIM else 'Endi har bir usulning xatosi va tezligini o’lchaymiz.'))
     p = min(1, f / ANIM); t = p * T; clock.set_text(f't = {t / 60:4.1f} daqiqa')
     for P in panels:
         m = P['m']; fr = m['frames']; j = min(len(fr) - 1, int(round(p * (len(fr) - 1))))
@@ -102,7 +130,7 @@ for f in range(N2):
 plt.close(fig)
 
 # ---------------- 3-sahna: taqqoslash (17–25 s) ----------------
-N3 = int(8 * FPS)
+N3 = int(11 * FPS)
 rows = [(m['name'] + ' ' + m['sub'].replace('+ ', '+ ').replace('katta qadam ', '').replace('kichik qadam ', ''), m) for m in M]
 order = sorted(range(len(M)), key=lambda k: (M[k]['err'] is None, -M[k]['ms']))
 best = min((k for k in range(len(M)) if M[k]['err'] is not None and M[k]['err'] <= 0.05), key=lambda k: M[k]['ms'])
@@ -147,7 +175,7 @@ for f in range(N3):
     emit(fig); plt.close(fig)
 
 # ---------------- 4-sahna: xulosa (25–30 s) ----------------
-N4 = int(5 * FPS)
+N4 = int(11 * FPS)
 for f in range(N4):
     fig = new_fig(); a = ease(f / (0.6 * FPS))
     fig.text(0.07, 0.83, 'ENG MAQBUL USUL', fontsize=26, weight='bold', color=GREEN, alpha=a)
@@ -158,10 +186,10 @@ for f in range(N4):
              f'2-tartibli aniqlik — oshkormas sxemadan {r_acc:.0f} marta aniqroq',
              f'Iteratsiyasiz, O(N) amal — 1D da Zeydeldan {r1:.0f} marta, 2D da SOR dan {r2:.0f} marta tez']
     for i, t in enumerate(items):
-        g = ease((f - (0.9 + 0.35 * i) * FPS) / (0.5 * FPS))
+        g = ease((f - (1.2 + 1.3 * i) * FPS) / (0.5 * FPS))
         fig.text(0.07, 0.46 - i * 0.075, '✓', fontsize=32, color=GREEN, alpha=g, weight='bold')
         fig.text(0.11, 0.46 - i * 0.075, t, fontsize=27, alpha=g)
-    g = ease((f - 2.2 * FPS) / (0.6 * FPS))
+    g = ease((f - 6.0 * FPS) / (0.6 * FPS))
     fig.text(0.07, 0.13, 'O’zingiz sinab ko’ring:', fontsize=26, color=MUTED, alpha=g)
     fig.text(0.30, 0.13, SITE, fontsize=30, color=BLUE, weight='bold', alpha=g, family='DejaVu Sans Mono')
     fig.text(0.07, 0.08, '“Usullarni taqqoslash” bo’limi', fontsize=22, color=MUTED, alpha=g)
@@ -169,4 +197,4 @@ for f in range(N4):
     emit(fig); plt.close(fig)
 
 ff.stdin.close(); ff.wait()
-print('ok', OUT, (N1 + N2 + N3 + N4) / FPS, 's')
+print('ok', OUT, (N1 + N1B + N2 + N3 + N4) / FPS, 's')

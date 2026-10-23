@@ -119,5 +119,5 @@ python tools/build.py               # index.html ni yigʻish
 
 
 ## Taqdimot va video
-- `TermoLab_taqdimot.pptx` — 16 slaydli taqdimot (usullar, sayt, nega kerak, tekshiruv).
-- `media/termolab_usullar.mp4` — 30 soniyalik video: 6 usul bir masalada, eng maqbuli aniqlanadi.
+- `TermoLab_taqdimot.pptx` — 18 slaydli taqdimot (sterjendan boshlanadi) (usullar, sayt, nega kerak, tekshiruv).
+- `media/termolab_usullar.mp4` — 51 soniyalik video: 6 usul bir masalada, eng maqbuli aniqlanadi.
